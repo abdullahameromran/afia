@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -16,7 +17,10 @@ import { answerWomensHealthQuestion, type AnswerWomensHealthQuestionInput, type 
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "الرجاء إدخال اسمكِ" }),
-  age: z.coerce.number().positive({ message: "الرجاء إدخال عمر صحيح" }).optional(),
+  age: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : val),
+    z.coerce.number({invalid_type_error: "الرجاء إدخال عمر صحيح"}).positive({ message: "الرجاء إدخال عمر صحيح" }).optional()
+  ),
   question: z.string().min(10, { message: "الرجاء إدخال سؤال واضح (10 أحرف على الأقل)" }),
 });
 
@@ -32,7 +36,7 @@ export function QnaForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: '',
-      age: undefined,
+      age: '' as unknown as undefined, // Initialize as empty string to make it controlled
       question: '',
     },
   });
@@ -46,6 +50,8 @@ export function QnaForm() {
       const input: AnswerWomensHealthQuestionInput = {
         question: data.question,
         userName: data.username,
+        // Pass age only if it's defined after Zod validation
+        ...(data.age !== undefined && { age: data.age })
       };
       const aiResponse: AnswerWomensHealthQuestionOutput = await answerWomensHealthQuestion(input);
       
@@ -68,6 +74,11 @@ export function QnaForm() {
       setIsLoading(false);
     }
   };
+
+  // When passing data to the AI, ensure age is correctly handled if it's undefined.
+  // The form data for 'age' will be a number if valid, or undefined if empty/optional.
+  const currentAge = form.watch('age');
+
 
   return (
     <Card className="w-full shadow-xl bg-card">
@@ -95,7 +106,15 @@ export function QnaForm() {
                 <FormItem>
                   <FormLabel htmlFor="age">عمركِ (اختياري)</FormLabel>
                   <FormControl>
-                    <Input id="age" type="number" placeholder="اكتبي عمركِ" {...field} className="text-right shadow-inner" />
+                    <Input 
+                      id="age" 
+                      type="number" 
+                      placeholder="اكتبي عمركِ" 
+                      {...field} 
+                      onChange={(e) => field.onChange(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                      value={field.value === undefined || field.value === null ? '' : String(field.value)}
+                      className="text-right shadow-inner [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
