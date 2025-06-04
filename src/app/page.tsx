@@ -1,4 +1,5 @@
-import { QnaForm } from '@/components/qna-form';
+
+import { ClientQnaFormWrapper } from '@/components/client-qna-form-wrapper';
 import { Feather } from 'lucide-react';
 
 export default function HomePage() {
@@ -15,7 +16,7 @@ export default function HomePage() {
             </h1>
           </div>
         </header>
-        <QnaForm />
+        <ClientQnaFormWrapper />
       </div>
     </main>
   );
