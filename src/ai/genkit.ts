@@ -9,5 +9,5 @@ const apiKey = process.env.GOOGLE_API_KEY || 'AIzaSyDB8rjCD_v4n1ZduGgLi0dsZZRTls
 
 export const ai = genkit({
   plugins: [googleAI(apiKey ? { apiKey: apiKey } : undefined)].filter(Boolean) as any, // Pass the key directly if available
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-1.5-flash-latest',
 });
