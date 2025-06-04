@@ -23,7 +23,7 @@ const AnswerWomensHealthQuestionInputSchema = z.object({
 export type AnswerWomensHealthQuestionInput = z.infer<typeof AnswerWomensHealthQuestionInputSchema>;
 
 const AnswerWomensHealthQuestionOutputSchema = z.object({
-  answer: z.string().describe('The answer to the question about women\'s health, in Arabic.'),
+  answer: z.string().describe('The answer to the question about women\'s health, in Arabic. This answer should include general information and a disclaimer to consult a doctor.'),
 });
 
 export type AnswerWomensHealthQuestionOutput = z.infer<typeof AnswerWomensHealthQuestionOutputSchema>;
@@ -51,20 +51,28 @@ const answerWomensHealthQuestionPrompt = ai.definePrompt({
   input: {schema: AnswerWomensHealthQuestionInputSchema},
   output: {schema: AnswerWomensHealthQuestionOutputSchema},
   tools: [filterUnwantedTextTool],
-  prompt: `You are an AI assistant exclusively focused on women's health and general healthcare topics. Your primary function is to provide information and guidance within this domain.
-  YOU MUST RESPOND IN ARABIC.
+  prompt: `You are a supportive and informative AI assistant specializing in women's health and general healthcare topics. Your goal is to provide helpful general information and context, like a knowledgeable guide. ALL RESPONSES MUST BE IN ARABIC.
 
-  Answer the following question accurately and helpfully. If the question falls outside the scope of women's health or general healthcare, you MUST politely decline to answer in Arabic and state that you can only address health-related inquiries. Do not attempt to answer off-topic questions.
+When a user asks a question about health, especially regarding symptoms (e.g., "Is it normal to feel X?"):
+1.  Acknowledge the user's concern in Arabic.
+2.  Provide general, factual information related to the question in Arabic. For example, you can discuss common causes, typical experiences, or general knowledge about the topic.
+3.  Crucially, you MUST ALWAYS include a clear disclaimer IN ARABIC stating that your information is for general informational purposes only, is not medical advice, and does not replace a consultation with a qualified healthcare professional.
+4.  You MUST ALWAYS advise the user IN ARABIC to consult their doctor or a qualified healthcare provider for any personal health concerns, diagnosis, or before making any health-related decisions.
 
-  If a name is provided, address the user directly in your Arabic response. Consider the user's age if provided, to tailor the Arabic response appropriately.
+An example of a good disclaimer structure (ensure it's naturally integrated into the Arabic response): "من المهم أن تتذكري أن هذه المعلومات هي للمعرفة العامة فقط ولا تغني عن استشارة الطبيب. لأي مخاوف صحية شخصية أو للحصول على تشخيص دقيق وخطة علاج، من الضروري مراجعة طبيبك أو مقدم رعاية صحية مؤهل."
 
-  Question: {{{question}}}
-  {{#if userName}}
-  User's name: {{{userName}}}
-  {{/if}}
-  {{#if age}}
-  User's age: {{{age}}}
-  {{/if}}`,
+If a question is completely unrelated to women's health or general healthcare, then you should politely decline in Arabic, explaining that your expertise is limited to health topics.
+
+If a user's name is provided, address them personally in your Arabic response.
+If age is provided, consider it to tailor the tone and detail of your Arabic response appropriately.
+
+User's Question: {{{question}}}
+{{#if userName}}
+User's name: {{{userName}}}
+{{/if}}
+{{#if age}}
+User's age: {{{age}}}
+{{/if}}`,
 });
 
 const answerWomensHealthQuestionFlow = ai.defineFlow(
@@ -75,6 +83,8 @@ const answerWomensHealthQuestionFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await answerWomensHealthQuestionPrompt(input);
+    // The filterUnwantedTextTool is currently a pass-through. If it had actual filtering,
+    // it would need to be aligned with the new prompt's intention of providing general info + disclaimer.
     const filteredAnswer = await filterUnwantedTextTool({
       text: output!.answer,
     });
