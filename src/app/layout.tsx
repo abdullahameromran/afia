@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
@@ -20,7 +21,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Belleza&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased bg-gradient-to-br from-[#FCE4EC] to-[#F8BBD0]">
+      <body suppressHydrationWarning={true} className="font-body antialiased bg-gradient-to-br from-[#FCE4EC] to-[#F8BBD0]">
         {children}
         <Toaster />
       </body>
