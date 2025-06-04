@@ -23,7 +23,7 @@ const AnswerWomensHealthQuestionInputSchema = z.object({
 export type AnswerWomensHealthQuestionInput = z.infer<typeof AnswerWomensHealthQuestionInputSchema>;
 
 const AnswerWomensHealthQuestionOutputSchema = z.object({
-  answer: z.string().describe('The answer to the question about women\'s health.'),
+  answer: z.string().describe('The answer to the question about women\'s health, in Arabic.'),
 });
 
 export type AnswerWomensHealthQuestionOutput = z.infer<typeof AnswerWomensHealthQuestionOutputSchema>;
@@ -52,10 +52,11 @@ const answerWomensHealthQuestionPrompt = ai.definePrompt({
   output: {schema: AnswerWomensHealthQuestionOutputSchema},
   tools: [filterUnwantedTextTool],
   prompt: `You are an AI assistant exclusively focused on women's health and general healthcare topics. Your primary function is to provide information and guidance within this domain.
+  YOU MUST RESPOND IN ARABIC.
 
-  Answer the following question accurately and helpfully. If the question falls outside the scope of women's health or general healthcare, you MUST politely decline to answer and state that you can only address health-related inquiries. Do not attempt to answer off-topic questions.
+  Answer the following question accurately and helpfully. If the question falls outside the scope of women's health or general healthcare, you MUST politely decline to answer in Arabic and state that you can only address health-related inquiries. Do not attempt to answer off-topic questions.
 
-  If a name is provided, address the user directly in your response. Consider the user's age if provided, to tailor the response appropriately.
+  If a name is provided, address the user directly in your Arabic response. Consider the user's age if provided, to tailor the Arabic response appropriately.
 
   Question: {{{question}}}
   {{#if userName}}
