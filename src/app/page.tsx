@@ -1,6 +1,6 @@
 
 import { ClientQnaFormWrapper } from '@/components/client-qna-form-wrapper';
-import { Feather } from 'lucide-react';
+import { Heart } from 'lucide-react'; // استيراد أيقونة القلب
 import Image from 'next/image';
 
 export default function HomePage() {
@@ -11,15 +11,7 @@ export default function HomePage() {
           <div 
             className="inline-flex items-center justify-center gap-x-4 bg-white/80 text-primary py-4 px-6 rounded-2xl shadow-lg"
           >
-            {/* This will appear on the far left visually in RTL (end of flex row) */}
-            <Feather size={36} className="text-primary" /> 
-            
-            {/* This will be in the middle */}
-            <h1 className="font-headline text-3xl sm:text-4xl font-bold text-center">
-              صحتكِ تهمنا – إشراف أ.د/ عايدة عبدالرازق
-            </h1>
-
-            {/* This will appear on the far right visually in RTL (start of flex row) */}
+            {/* صورة الدكتورة عايدة - ستظهر على اليسار في واجهة RTL */}
             <Image
               src="https://be13a6bfb72b1843b287a4c59c4f4174.cdn.bubble.io/f1749070664202x663207571008088400/8624f5b1-c5a3-438a-bbfa-4c1deda79052.jpg"
               alt="أ.د/ عايدة عبدالرازق"
@@ -29,6 +21,14 @@ export default function HomePage() {
               data-ai-hint="doctor portrait"
               priority
             />
+            
+            {/* العنوان في المنتصف */}
+            <h1 className="font-headline text-3xl sm:text-4xl font-bold text-center">
+              صحتكِ تهمنا – إشراف أ.د/ عايدة عبدالرازق
+            </h1>
+
+            {/* أيقونة القلب - ستظهر على اليمين في واجهة RTL */}
+            <Heart size={36} className="text-primary" /> 
           </div>
         </header>
         <ClientQnaFormWrapper />
