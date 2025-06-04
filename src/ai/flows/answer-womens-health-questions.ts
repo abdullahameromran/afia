@@ -1,3 +1,4 @@
+
 // This file is machine-generated - edit with care!
 
 'use server';
@@ -15,7 +16,8 @@ import {z} from 'genkit';
 
 const AnswerWomensHealthQuestionInputSchema = z.object({
   question: z.string().describe('The question about women\'s health.'),
-  userName: z.string().optional().describe('The name of the user asking the question.')
+  userName: z.string().optional().describe('The name of the user asking the question.'),
+  age: z.number().optional().describe('The age of the user asking the question.')
 });
 
 export type AnswerWomensHealthQuestionInput = z.infer<typeof AnswerWomensHealthQuestionInputSchema>;
@@ -49,13 +51,18 @@ const answerWomensHealthQuestionPrompt = ai.definePrompt({
   input: {schema: AnswerWomensHealthQuestionInputSchema},
   output: {schema: AnswerWomensHealthQuestionOutputSchema},
   tools: [filterUnwantedTextTool],
-  prompt: `You are a helpful AI assistant specialized in providing information and guidance on women's health.
+  prompt: `You are an AI assistant exclusively focused on women's health and general healthcare topics. Your primary function is to provide information and guidance within this domain.
 
-  Answer the following question accurately and helpfully. If a name is provided, respond to the user directly.
+  Answer the following question accurately and helpfully. If the question falls outside the scope of women's health or general healthcare, you MUST politely decline to answer and state that you can only address health-related inquiries. Do not attempt to answer off-topic questions.
+
+  If a name is provided, address the user directly in your response. Consider the user's age if provided, to tailor the response appropriately.
 
   Question: {{{question}}}
   {{#if userName}}
-  The user's name is: {{{userName}}}
+  User's name: {{{userName}}}
+  {{/if}}
+  {{#if age}}
+  User's age: {{{age}}}
   {{/if}}`,
 });
 
@@ -75,3 +82,4 @@ const answerWomensHealthQuestionFlow = ai.defineFlow(
     };
   }
 );
+
