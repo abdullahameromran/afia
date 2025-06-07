@@ -13,7 +13,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { db } from '@/lib/firebase';
+import { db } from '@/lib/firebase'; // db can now be Firestore | null
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const AnswerWomensHealthQuestionInputSchema = z.object({
@@ -47,8 +47,8 @@ async (input) => {
 export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuestionInput): Promise<AnswerWomensHealthQuestionOutput> {
   const flowResult = await answerWomensHealthQuestionFlow(input);
 
-  // Save to Firestore if the answer is generated and db is available
-  if (flowResult?.answer && db && typeof db.collection === 'function') {
+  // Save to Firestore if the answer is generated and db is a valid Firestore instance
+  if (flowResult?.answer && db) { // Check if db is not null
     try {
       await addDoc(collection(db, 'qnaHistory'), {
         question: input.question,
@@ -62,8 +62,8 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
       console.error("Error saving Q&A history to Firestore:", e);
       // Decide if this error should be propagated or just logged
     }
-  } else if (!db || typeof db.collection !== 'function') {
-    console.warn("Firestore is not properly initialized. Skipping save of Q&A history.");
+  } else if (!db) { // If db is null
+    console.warn("Firestore (db) is not initialized. Skipping save of Q&A history. Please check Firebase configuration in .env.");
   }
   return flowResult;
 }

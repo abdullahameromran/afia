@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, LogOut, ListChecks, AlertTriangle } from 'lucide-react';
-import { db } from '@/lib/firebase';
-import { collection, query, orderBy, getDocs, Timestamp as FirestoreTimestamp } from 'firebase/firestore'; // Renamed Timestamp to avoid conflict
+import { db } from '@/lib/firebase'; // db can now be Firestore | null
+import { collection, query, orderBy, getDocs, Timestamp as FirestoreTimestamp } from 'firebase/firestore';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -42,10 +42,10 @@ export default function AdminPage() {
       const fetchHistory = async () => {
         setHistoryLoading(true);
         setHistoryError(null);
-        // Check if db and db.collection are available (Firebase initialized)
-        if (!db || typeof db.collection !== 'function') {
-            console.warn("Firestore is not initialized. Cannot fetch Q&A history.");
-            setHistoryError("فشل الاتصال بقاعدة البيانات. يرجى التحقق من إعدادات Firebase.");
+        
+        if (!db) { // Check if db is not null
+            console.warn("Firestore (db) is not initialized. Cannot fetch Q&A history. Please check Firebase configuration in .env.");
+            setHistoryError("فشل الاتصال بقاعدة البيانات. يرجى التحقق من إعدادات Firebase وتحديث ملف .env.");
             setHistoryLoading(false);
             setQnaHistory([]); // Ensure history is empty if DB is not available
             return;
@@ -60,7 +60,7 @@ export default function AdminPage() {
           });
           setQnaHistory(history);
         } catch (err) {
-          console.error("Error fetching Q&A history:", err);
+          console.error("Error fetching Q&A history from Firestore:", err);
           setHistoryError("فشل في تحميل سجل الأسئلة والأجوبة. الرجاء المحاولة مرة أخرى.");
         } finally {
           setHistoryLoading(false);
@@ -138,7 +138,7 @@ export default function AdminPage() {
             {!historyLoading && !historyError && qnaHistory.length === 0 && (
               <div className="p-6 border border-dashed border-border rounded-lg text-center">
                 <p className="text-muted-foreground">
-                  لا يوجد سجل أسئلة وأجوبة لعرضه حتى الآن.
+                  {db ? "لا يوجد سجل أسئلة وأجوبة لعرضه حتى الآن." : "قاعدة البيانات غير مهيأة. يرجى التحقق من إعدادات Firebase في ملف .env."}
                 </p>
               </div>
             )}
