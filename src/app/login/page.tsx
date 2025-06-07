@@ -38,8 +38,10 @@ export default function LoginPage() {
   }
 
   if (isAuthenticated) {
-    router.push('/admin'); // Should be handled by AuthContext effect, but as a fallback
-    return null;
+    // AuthContext effect should handle this, but as a fallback redirect.
+    // No UI needed here, router.push will navigate away.
+    // router.push('/admin'); // This line might be redundant if AuthContext handles it robustly
+    return null; 
   }
 
   return (
@@ -95,7 +97,7 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="text-center block mt-4">
           <p className="text-xs text-muted-foreground">
-            هذه لوحة تحكم تجريبية. استخدم: admin@dashboard.com / admin123
+            بيانات الدخول التجريبية: admin@dashboard.com / admin123
           </p>
         </CardFooter>
       </Card>

@@ -13,6 +13,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const AnswerWomensHealthQuestionInputSchema = z.object({
   question: z.string().describe('The question about women\'s health.'),
@@ -43,7 +45,27 @@ async (input) => {
 });
 
 export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuestionInput): Promise<AnswerWomensHealthQuestionOutput> {
-  return answerWomensHealthQuestionFlow(input);
+  const flowResult = await answerWomensHealthQuestionFlow(input);
+
+  // Save to Firestore if the answer is generated and db is available
+  if (flowResult?.answer && db && typeof db.collection === 'function') {
+    try {
+      await addDoc(collection(db, 'qnaHistory'), {
+        question: input.question,
+        userName: input.userName || null,
+        age: input.age || null,
+        answer: flowResult.answer,
+        timestamp: serverTimestamp(),
+      });
+      console.log("Q&A history saved to Firestore");
+    } catch (e) {
+      console.error("Error saving Q&A history to Firestore:", e);
+      // Decide if this error should be propagated or just logged
+    }
+  } else if (!db || typeof db.collection !== 'function') {
+    console.warn("Firestore is not properly initialized. Skipping save of Q&A history.");
+  }
+  return flowResult;
 }
 
 const answerWomensHealthQuestionPrompt = ai.definePrompt({
@@ -93,4 +115,3 @@ const answerWomensHealthQuestionFlow = ai.defineFlow(
     };
   }
 );
-
