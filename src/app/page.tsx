@@ -30,13 +30,13 @@ export default function HomePage() {
         </header>
 
         <section className="mb-8 p-6 bg-card rounded-xl shadow-lg text-center">
-          <p className="text-lg leading-relaxed mb-4">
+          <p className="text-lg leading-relaxed mb-6">
             يهدف هذا التطبيق لتقديم معلومات ودعم في كل ما يخص صحة المرأة، بما في ذلك الحمل والولادة، العناية بعد الولادة، تنظيم الأسرة، وغيرها من المواضيع الهامة. صحتكِ هي أولويتنا.
           </p>
-          <p className="text-md font-semibold text-primary mb-2">
+          <p className="text-md font-semibold text-primary mb-3">
             تحت إشراف: أ.د/ عايدة عبدالرازق
           </p>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-sm text-muted-foreground mb-6">
             أستاذ صحة المرأة - كلية التمريض، جامعة المنوفية
           </p>
           <div className="flex items-center justify-center gap-2 text-primary font-semibold">
