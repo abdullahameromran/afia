@@ -1,7 +1,8 @@
 
 import { ClientQnaFormWrapper } from '@/components/client-qna-form-wrapper';
-import { Heart, Phone, Sparkles } from 'lucide-react';
+import { Heart, Phone, Sparkles, CalendarDays, CalendarHeart, Bell } from 'lucide-react';
 import Image from 'next/image';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function HomePage() {
   return (
@@ -44,6 +45,47 @@ export default function HomePage() {
         </section>
 
         <ClientQnaFormWrapper />
+
+        <section className="mt-12 mb-8 text-center">
+          <h2 className="font-headline text-2xl sm:text-3xl font-bold text-primary mb-6">
+            أدوات إضافية لصحتكِ
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="bg-card shadow-lg">
+              <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
+                <CalendarDays className="h-8 w-8 text-primary" />
+                <CardTitle className="text-xl font-semibold text-primary">متابعة الدورة</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  سجلي دورتك الشهرية وتوقعي مواعيدها القادمة بدقة.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card shadow-lg">
+              <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
+                <CalendarHeart className="h-8 w-8 text-primary" />
+                <CardTitle className="text-xl font-semibold text-primary">متابعة التبويض</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  اعرفي أيام التبويض لزيادة فرص الحمل أو لتجنبه.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card shadow-lg">
+              <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
+                <Bell className="h-8 w-8 text-primary" />
+                <CardTitle className="text-xl font-semibold text-primary">تذكيرات هامة</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  تنبيهات لمواعيد هامة تخص صحتكِ، دورتكِ، أو فترة التبويض.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
         <footer className="mt-12 pt-8 border-t border-border/50 text-center">
           <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
