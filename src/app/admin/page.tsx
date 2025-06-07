@@ -42,7 +42,7 @@ export default function AdminPage() {
         
         if (!supabase) {
             console.warn("Supabase client is not initialized. Cannot fetch Q&A history. Please check Supabase configuration in .env.");
-            setHistoryError("فشل الاتصال بقاعدة البيانات (Supabase). يرجى التحقق من إعدادات Supabase وتحديث ملف .env.");
+            setHistoryError("فشل الاتصال بخدمة تخزين البيانات. يرجى التحقق من إعدادات الاتصال وملف .env.");
             setHistoryLoading(false);
             setQnaHistory([]);
             return;
@@ -111,10 +111,10 @@ export default function AdminPage() {
           <CardHeader>
             <CardTitle className="text-2xl text-primary flex items-center gap-2">
               <ListChecks />
-              عرض سجل الأسئلة والأجوبة (Supabase)
+              عرض سجل الأسئلة والأجوبة
             </CardTitle>
             <CardDescription>
-              جميع الأسئلة التي طرحها المستخدمون والإجابات المقدمة من النظام، محفوظة في Supabase.
+              جميع الأسئلة التي طرحها المستخدمون والإجابات المقدمة من النظام، محفوظة في قاعدة البيانات.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -133,7 +133,7 @@ export default function AdminPage() {
             {!historyLoading && !historyError && qnaHistory.length === 0 && (
               <div className="p-6 border border-dashed border-border rounded-lg text-center">
                 <p className="text-muted-foreground">
-                  {supabase ? "لا يوجد سجل أسئلة وأجوبة لعرضه حتى الآن." : "عميل Supabase غير مهيأ. يرجى التحقق من إعدادات Supabase في ملف .env."}
+                  {supabase ? "لا يوجد سجل أسئلة وأجوبة لعرضه حتى الآن." : "خدمة تخزين البيانات غير مهيأة. يرجى التحقق من الإعدادات في ملف .env."}
                 </p>
               </div>
             )}
@@ -168,7 +168,7 @@ export default function AdminPage() {
       </main>
        <footer className="mt-12 pt-8 border-t border-border/50 text-center w-full max-w-6xl">
           <p className="text-sm text-muted-foreground/80">
-            &copy; {new Date().getFullYear()} لوحة تحكم صحتكِ تهمنا (Supabase Edition)
+            &copy; {new Date().getFullYear()} لوحة تحكم صحتكِ تهمنا
           </p>
         </footer>
     </div>

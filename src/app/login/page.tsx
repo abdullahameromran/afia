@@ -95,11 +95,13 @@ export default function LoginPage() {
             </Button>
           </form>
         </CardContent>
+        {/* The CardFooter with demo credentials has been removed.
         <CardFooter className="text-center block mt-4">
           <p className="text-xs text-muted-foreground">
             بيانات الدخول التجريبية: admin@dashboard.com / admin123
           </p>
         </CardFooter>
+        */}
       </Card>
     </div>
   );
