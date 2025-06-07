@@ -3,6 +3,9 @@ import { ClientQnaFormWrapper } from '@/components/client-qna-form-wrapper';
 import { Heart, Phone, Sparkles, CalendarDays, CalendarHeart, Bell } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { PeriodTracker } from '@/components/period-tracker';
+import { Button } from '@/components/ui/button';
 
 export default function HomePage() {
   return (
@@ -10,7 +13,7 @@ export default function HomePage() {
       <div className="w-full max-w-2xl">
         <header className="mb-8 text-center">
           <div 
-            className="inline-flex items-center justify-center gap-x-4 bg-white/80 text-primary py-4 px-6 rounded-2xl shadow-lg"
+            className="inline-flex items-center justify-center gap-x-2 sm:gap-x-4 bg-white/80 text-primary py-4 px-6 rounded-2xl shadow-lg"
           >
             <Heart size={36} className="text-primary order-last sm:order-first" /> 
             <h1 className="font-headline text-3xl sm:text-4xl font-bold text-center mx-2 sm:mx-0">
@@ -28,7 +31,7 @@ export default function HomePage() {
           </div>
         </header>
 
-        <section className="mb-8 p-6 bg-card rounded-xl shadow-lg text-center">
+        <section className="mb-8 p-6 bg-card rounded-xl shadow-lg text-center text-card-foreground">
           <p className="text-lg leading-relaxed mb-6">
             يهدف هذا التطبيق لتقديم معلومات ودعم في كل ما يخص صحة المرأة، بما في ذلك الحمل والولادة، العناية بعد الولادة، تنظيم الأسرة، وغيرها من المواضيع الهامة. صحتكِ هي أولويتنا.
           </p>
@@ -51,36 +54,55 @@ export default function HomePage() {
             أدوات إضافية لصحتكِ
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bg-card shadow-lg">
-              <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
-                <CalendarDays className="h-8 w-8 text-primary" />
-                <CardTitle className="text-xl font-semibold text-primary">متابعة الدورة</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  سجلي دورتك الشهرية وتوقعي مواعيدها القادمة بدقة.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-card shadow-lg">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                  <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
+                    <CalendarDays className="h-8 w-8 text-primary" />
+                    <CardTitle className="text-xl font-semibold text-primary">متابعة الدورة</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      سجلي دورتك الشهرية وتوقعي مواعيدها القادمة بدقة.
+                    </p>
+                  </CardContent>
+                </Card>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px] text-right bg-card">
+                <DialogHeader>
+                  <DialogTitle className="font-headline text-primary">متابعة الدورة الشهرية</DialogTitle>
+                  <DialogDescription>
+                    أدخلي تاريخ بدء آخر دورة شهرية ومتوسط طول دورتكِ لحساب الموعد المتوقع للدورة القادمة.
+                  </DialogDescription>
+                </DialogHeader>
+                <PeriodTracker />
+                 <DialogClose asChild>
+                    <Button type="button" variant="outline" className="mt-4 w-full">
+                      إغلاق
+                    </Button>
+                  </DialogClose>
+              </DialogContent>
+            </Dialog>
+
+            <Card className="bg-card shadow-lg opacity-50 cursor-not-allowed">
               <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
                 <CalendarHeart className="h-8 w-8 text-primary" />
                 <CardTitle className="text-xl font-semibold text-primary">متابعة التبويض</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  اعرفي أيام التبويض لزيادة فرص الحمل أو لتجنبه.
+                  اعرفي أيام التبويض لزيادة فرص الحمل أو لتجنبه. (قريبًا)
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-card shadow-lg">
+            <Card className="bg-card shadow-lg opacity-50 cursor-not-allowed">
               <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
                 <Bell className="h-8 w-8 text-primary" />
                 <CardTitle className="text-xl font-semibold text-primary">تذكيرات هامة</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  تنبيهات لمواعيد هامة تخص صحتكِ، دورتكِ، أو فترة التبويض.
+                  تنبيهات لمواعيد هامة تخص صحتكِ، دورتكِ، أو فترة التبويض. (قريبًا)
                 </p>
               </CardContent>
             </Card>
@@ -100,3 +122,5 @@ export default function HomePage() {
     </main>
   );
 }
+
+    
