@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { PeriodTracker } from '@/components/period-tracker';
+import { OvulationTracker } from '@/components/ovulation-tracker';
+import { RemindersDisplay } from '@/components/reminders-display';
 import { Button } from '@/components/ui/button';
 
 export default function HomePage() {
@@ -84,28 +86,65 @@ export default function HomePage() {
               </DialogContent>
             </Dialog>
 
-            <Card className="bg-card shadow-lg opacity-50 cursor-not-allowed">
-              <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
-                <CalendarHeart className="h-8 w-8 text-primary" />
-                <CardTitle className="text-xl font-semibold text-primary">متابعة التبويض</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  اعرفي أيام التبويض لزيادة فرص الحمل أو لتجنبه. (قريبًا)
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-card shadow-lg opacity-50 cursor-not-allowed">
-              <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
-                <Bell className="h-8 w-8 text-primary" />
-                <CardTitle className="text-xl font-semibold text-primary">تذكيرات هامة</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  تنبيهات لمواعيد هامة تخص صحتكِ، دورتكِ، أو فترة التبويض. (قريبًا)
-                </p>
-              </CardContent>
-            </Card>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                  <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
+                    <CalendarHeart className="h-8 w-8 text-primary" />
+                    <CardTitle className="text-xl font-semibold text-primary">متابعة التبويض</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      اعرفي أيام التبويض لزيادة فرص الحمل أو لتجنبه.
+                    </p>
+                  </CardContent>
+                </Card>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px] text-right bg-card">
+                <DialogHeader>
+                  <DialogTitle className="font-headline text-primary">متابعة فترة التبويض</DialogTitle>
+                  <DialogDescription>
+                    أدخلي بيانات دورتكِ لتقدير يوم التبويض وفترة الخصوبة.
+                  </DialogDescription>
+                </DialogHeader>
+                <OvulationTracker />
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" className="mt-4 w-full">
+                    إغلاق
+                  </Button>
+                </DialogClose>
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <Card className="bg-card shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                  <CardHeader className="flex-row items-center justify-center gap-3 pb-2">
+                    <Bell className="h-8 w-8 text-primary" />
+                    <CardTitle className="text-xl font-semibold text-primary">تذكيرات هامة</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      عرض تذكيرات لمواعيد دورتكِ وفترة التبويض المحفوظة.
+                    </p>
+                  </CardContent>
+                </Card>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px] text-right bg-card">
+                <DialogHeader>
+                  <DialogTitle className="font-headline text-primary">تذكيراتكِ الصحية</DialogTitle>
+                  <DialogDescription>
+                    هنا تظهر التواريخ الهامة بناءً على البيانات التي أدخلتيها في الأدوات الأخرى.
+                  </DialogDescription>
+                </DialogHeader>
+                <RemindersDisplay />
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" className="mt-4 w-full">
+                    إغلاق
+                  </Button>
+                </DialogClose>
+              </DialogContent>
+            </Dialog>
           </div>
         </section>
 
@@ -122,5 +161,3 @@ export default function HomePage() {
     </main>
   );
 }
-
-    
