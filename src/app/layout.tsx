@@ -2,6 +2,7 @@
 import type { Metadata } from 'next';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
+import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
   title: 'Afia Balsemak - صحتكِ تهمنا',
@@ -22,7 +23,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body suppressHydrationWarning={true} className="font-body antialiased bg-gradient-to-br from-[#FCE4EC] to-[#F8BBD0]">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
         <Toaster />
       </body>
     </html>
