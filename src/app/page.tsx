@@ -1,6 +1,6 @@
 
 import { ClientQnaFormWrapper } from '@/components/client-qna-form-wrapper';
-import { Heart, Phone } from 'lucide-react';
+import { Heart, Phone, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 
 export default function HomePage() {
@@ -11,21 +11,19 @@ export default function HomePage() {
           <div 
             className="inline-flex items-center justify-center gap-x-4 bg-white/80 text-primary py-4 px-6 rounded-2xl shadow-lg"
           >
+            <Heart size={36} className="text-primary order-last sm:order-first" /> 
+            <h1 className="font-headline text-3xl sm:text-4xl font-bold text-center mx-2 sm:mx-0">
+              صحتكِ تهمنا
+            </h1>
             <Image
               src="https://be13a6bfb72b1843b287a4c59c4f4174.cdn.bubble.io/f1749070664202x663207571008088400/8624f5b1-c5a3-438a-bbfa-4c1deda79052.jpg"
               alt="أ.د/ عايدة عبدالرازق"
               width={72}
               height={72}
-              className="rounded-full border-2 border-white shadow-sm object-cover"
+              className="rounded-full border-2 border-white shadow-sm object-cover order-first sm:order-last"
               data-ai-hint="doctor portrait"
               priority
             />
-            
-            <h1 className="font-headline text-3xl sm:text-4xl font-bold text-center">
-              صحتكِ تهمنا
-            </h1>
-
-            <Heart size={36} className="text-primary" /> 
           </div>
         </header>
 
@@ -39,13 +37,23 @@ export default function HomePage() {
           <p className="text-sm text-muted-foreground mb-6">
             أستاذ صحة المرأة - كلية التمريض، جامعة المنوفية
           </p>
-          <div className="flex items-center justify-center gap-2 text-primary font-semibold">
+          <div className="flex items-center justify-center gap-2 text-primary font-semibold mb-4">
             <Phone size={20} />
             <span>للتواصل: 01205342194</span>
           </div>
         </section>
 
         <ClientQnaFormWrapper />
+
+        <footer className="mt-12 pt-8 border-t border-border/50 text-center">
+          <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
+            <Sparkles size={20} className="text-primary" />
+            <p className="text-md">شكراً لاستخدامكِ تطبيق صحتكِ تهمنا!</p>
+          </div>
+          <p className="text-sm text-muted-foreground/80">
+            نحن هنا دائمًا لمزيد من الأسئلة والدعم.
+          </p>
+        </footer>
       </div>
     </main>
   );
