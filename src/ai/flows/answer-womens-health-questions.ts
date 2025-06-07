@@ -1,6 +1,4 @@
 
-// This file is machine-generated - edit with care!
-
 'use server';
 
 /**
@@ -13,8 +11,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { db } from '@/lib/firebase'; // db can now be Firestore | null
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { createSupabaseServiceRoleClient } from '@/lib/supabaseClient'; // Using service role client for server-side
 
 const AnswerWomensHealthQuestionInputSchema = z.object({
   question: z.string().describe('The question about women\'s health.'),
@@ -46,24 +43,33 @@ async (input) => {
 
 export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuestionInput): Promise<AnswerWomensHealthQuestionOutput> {
   const flowResult = await answerWomensHealthQuestionFlow(input);
+  const supabase = createSupabaseServiceRoleClient();
 
-  // Save to Firestore if the answer is generated and db is a valid Firestore instance
-  if (flowResult?.answer && db) { // Check if db is not null
+  if (flowResult?.answer && supabase) {
     try {
-      await addDoc(collection(db, 'qnaHistory'), {
-        question: input.question,
-        userName: input.userName || null,
-        age: input.age || null,
-        answer: flowResult.answer,
-        timestamp: serverTimestamp(),
-      });
-      console.log("Q&A history saved to Firestore");
+      const { error } = await supabase
+        .from('qnaHistory')
+        .insert([
+          { 
+            question: input.question,
+            userName: input.userName || null, // Supabase handles null for optional fields
+            age: input.age || null,
+            answer: flowResult.answer,
+            // timestamp is handled by DB default NOW()
+          }
+        ]);
+
+      if (error) {
+        console.error("Error saving Q&A history to Supabase:", error);
+        // Decide if this error should be propagated or just logged
+      } else {
+        console.log("Q&A history saved to Supabase");
+      }
     } catch (e) {
-      console.error("Error saving Q&A history to Firestore:", e);
-      // Decide if this error should be propagated or just logged
+      console.error("Exception saving Q&A history to Supabase:", e);
     }
-  } else if (!db) { // If db is null
-    console.warn("Firestore (db) is not initialized. Skipping save of Q&A history. Please check Firebase configuration in .env.");
+  } else if (!supabase) {
+    console.warn("Supabase client (service role) is not initialized. Skipping save of Q&A history. Please check Supabase configuration in .env.");
   }
   return flowResult;
 }
@@ -105,8 +111,6 @@ const answerWomensHealthQuestionFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await answerWomensHealthQuestionPrompt(input);
-    // The filterUnwantedTextTool is currently a pass-through. If it had actual filtering,
-    // it would need to be aligned with the new prompt's intention of providing general info + disclaimer.
     const filteredAnswer = await filterUnwantedTextTool({
       text: output!.answer,
     });

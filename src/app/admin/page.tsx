@@ -7,18 +7,17 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, LogOut, ListChecks, AlertTriangle } from 'lucide-react';
-import { db } from '@/lib/firebase'; // db can now be Firestore | null
-import { collection, query, orderBy, getDocs, Timestamp as FirestoreTimestamp } from 'firebase/firestore';
+import { supabase } from '@/lib/supabaseClient'; // Using the anon key client for browser
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface QnaEntry {
-  id: string;
+  id: number;
   question: string;
   userName?: string;
   age?: number;
   answer: string;
-  timestamp: FirestoreTimestamp; // Firebase Timestamp
+  timestamp: string; // Supabase timestamp is typically an ISO string
 }
 
 
@@ -30,45 +29,43 @@ export default function AdminPage() {
   const [historyError, setHistoryError] = useState<string | null>(null);
 
   useEffect(() => {
-    // This effect handles initial auth check and redirection if not authenticated
     if (!authIsLoading && !isAuthenticated) {
       router.push('/login');
     }
   }, [authIsLoading, isAuthenticated, router]);
 
   useEffect(() => {
-    // This effect fetches data once authenticated and auth is no longer loading
     if (isAuthenticated && !authIsLoading) {
       const fetchHistory = async () => {
         setHistoryLoading(true);
         setHistoryError(null);
         
-        if (!db) { // Check if db is not null
-            console.warn("Firestore (db) is not initialized. Cannot fetch Q&A history. Please check Firebase configuration in .env.");
-            setHistoryError("فشل الاتصال بقاعدة البيانات. يرجى التحقق من إعدادات Firebase وتحديث ملف .env.");
+        if (!supabase) {
+            console.warn("Supabase client is not initialized. Cannot fetch Q&A history. Please check Supabase configuration in .env.");
+            setHistoryError("فشل الاتصال بقاعدة البيانات (Supabase). يرجى التحقق من إعدادات Supabase وتحديث ملف .env.");
             setHistoryLoading(false);
-            setQnaHistory([]); // Ensure history is empty if DB is not available
+            setQnaHistory([]);
             return;
         }
         try {
-          const qnaCollection = collection(db, 'qnaHistory');
-          const qnaQuery = query(qnaCollection, orderBy('timestamp', 'desc'));
-          const querySnapshot = await getDocs(qnaQuery);
-          const history: QnaEntry[] = [];
-          querySnapshot.forEach((doc) => {
-            history.push({ id: doc.id, ...doc.data() } as QnaEntry);
-          });
-          setQnaHistory(history);
-        } catch (err) {
-          console.error("Error fetching Q&A history from Firestore:", err);
-          setHistoryError("فشل في تحميل سجل الأسئلة والأجوبة. الرجاء المحاولة مرة أخرى.");
+          const { data, error } = await supabase
+            .from('qnaHistory')
+            .select('*')
+            .order('timestamp', { ascending: false });
+
+          if (error) {
+            throw error;
+          }
+          setQnaHistory(data as QnaEntry[]);
+        } catch (err: any) {
+          console.error("Error fetching Q&A history from Supabase:", err);
+          setHistoryError(`فشل في تحميل سجل الأسئلة والأجوبة: ${err.message || 'خطأ غير معروف'}`);
         } finally {
           setHistoryLoading(false);
         }
       };
       fetchHistory();
     } else if (!authIsLoading && !isAuthenticated) {
-      // If somehow not authenticated and not loading, ensure history is cleared and not loading.
       setQnaHistory([]);
       setHistoryLoading(false);
     }
@@ -84,8 +81,6 @@ export default function AdminPage() {
   }
 
   if (!isAuthenticated) {
-    // This case should ideally be rare due to the useEffect redirect,
-    // but it's a fallback.
      return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#FCE4EC] to-[#F8BBD0] p-4">
             <Card className="w-full max-w-md text-center">
@@ -116,10 +111,10 @@ export default function AdminPage() {
           <CardHeader>
             <CardTitle className="text-2xl text-primary flex items-center gap-2">
               <ListChecks />
-              عرض سجل الأسئلة والأجوبة
+              عرض سجل الأسئلة والأجوبة (Supabase)
             </CardTitle>
             <CardDescription>
-              جميع الأسئلة التي طرحها المستخدمون والإجابات المقدمة من النظام.
+              جميع الأسئلة التي طرحها المستخدمون والإجابات المقدمة من النظام، محفوظة في Supabase.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -138,7 +133,7 @@ export default function AdminPage() {
             {!historyLoading && !historyError && qnaHistory.length === 0 && (
               <div className="p-6 border border-dashed border-border rounded-lg text-center">
                 <p className="text-muted-foreground">
-                  {db ? "لا يوجد سجل أسئلة وأجوبة لعرضه حتى الآن." : "قاعدة البيانات غير مهيأة. يرجى التحقق من إعدادات Firebase في ملف .env."}
+                  {supabase ? "لا يوجد سجل أسئلة وأجوبة لعرضه حتى الآن." : "عميل Supabase غير مهيأ. يرجى التحقق من إعدادات Supabase في ملف .env."}
                 </p>
               </div>
             )}
@@ -157,7 +152,7 @@ export default function AdminPage() {
                   <TableBody>
                     {qnaHistory.map((entry) => (
                       <TableRow key={entry.id}>
-                        <TableCell>{entry.timestamp ? new Date(entry.timestamp.seconds * 1000).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
+                        <TableCell>{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
                         <TableCell>{entry.userName || '-'}</TableCell>
                         <TableCell>{entry.age || '-'}</TableCell>
                         <TableCell className="whitespace-pre-wrap max-w-sm break-words">{entry.question}</TableCell>
@@ -173,7 +168,7 @@ export default function AdminPage() {
       </main>
        <footer className="mt-12 pt-8 border-t border-border/50 text-center w-full max-w-6xl">
           <p className="text-sm text-muted-foreground/80">
-            &copy; {new Date().getFullYear()} لوحة تحكم صحتكِ تهمنا
+            &copy; {new Date().getFullYear()} لوحة تحكم صحتكِ تهمنا (Supabase Edition)
           </p>
         </footer>
     </div>
