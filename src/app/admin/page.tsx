@@ -6,7 +6,8 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, LogOut, ListChecks, AlertTriangle } from 'lucide-react';
+import { Loader2, LogOut, ListChecks, AlertTriangle, Heart } from 'lucide-react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient'; // Using the anon key client for browser
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -99,11 +100,28 @@ export default function AdminPage() {
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-gradient-to-br from-[#FCE4EC] to-[#F8BBD0] p-4 sm:p-8">
       <header className="w-full max-w-6xl mb-8 flex justify-between items-center">
-        <h1 className="text-3xl sm:text-4xl font-headline text-primary">لوحة تحكم الإدارة</h1>
-        <Button onClick={logout} variant="outline" className="bg-white/80 hover:bg-white">
-          <LogOut className="ml-2 h-5 w-5" />
-          تسجيل الخروج
-        </Button>
+        <div className="flex items-center gap-2 sm:gap-4">
+           <Image
+              src="https://be13a6bfb72b1843b287a4c59c4f4174.cdn.bubble.io/f1749070664202x663207571008088400/8624f5b1-c5a3-438a-bbfa-4c1deda79052.jpg"
+              alt="أ.د/ عايدة عبدالرازق"
+              width={56} 
+              height={56}
+              className="rounded-full border-2 border-white shadow-sm object-cover"
+              data-ai-hint="doctor portrait"
+              priority
+            />
+            <h1 className="font-headline text-2xl sm:text-3xl font-bold text-primary">
+              صحتكِ تهمنا
+            </h1>
+            <Heart size={30} className="text-primary" /> 
+        </div>
+        <div className="flex flex-col items-end">
+            <h2 className="text-2xl sm:text-3xl font-headline text-primary">لوحة تحكم الإدارة</h2>
+            <Button onClick={logout} variant="outline" className="bg-white/80 hover:bg-white mt-2">
+              <LogOut className="ml-2 h-5 w-5" />
+              تسجيل الخروج
+            </Button>
+        </div>
       </header>
 
       <main className="w-full max-w-6xl space-y-8">
@@ -142,21 +160,21 @@ export default function AdminPage() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
-                      <TableHead className="w-[150px]">الوقت</TableHead>
-                      <TableHead className="w-[120px]">المستخدم</TableHead>
-                      <TableHead className="w-[70px]">العمر</TableHead>
-                      <TableHead>السؤال</TableHead>
-                      <TableHead>الإجابة</TableHead>
+                      <TableHead className="w-[150px] text-right">الوقت</TableHead>
+                      <TableHead className="w-[120px] text-right">المستخدم</TableHead>
+                      <TableHead className="w-[70px] text-right">العمر</TableHead>
+                      <TableHead className="text-right">السؤال</TableHead>
+                      <TableHead className="text-right">الإجابة</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {qnaHistory.map((entry) => (
                       <TableRow key={entry.id}>
-                        <TableCell>{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
-                        <TableCell>{entry.userName || '-'}</TableCell>
-                        <TableCell>{entry.age || '-'}</TableCell>
-                        <TableCell className="whitespace-pre-wrap max-w-sm break-words">{entry.question}</TableCell>
-                        <TableCell className="whitespace-pre-wrap max-w-md break-words">{entry.answer}</TableCell>
+                        <TableCell className="text-right">{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
+                        <TableCell className="text-right">{entry.userName || '-'}</TableCell>
+                        <TableCell className="text-right">{entry.age || '-'}</TableCell>
+                        <TableCell className="whitespace-pre-wrap max-w-sm break-words text-right">{entry.question}</TableCell>
+                        <TableCell className="whitespace-pre-wrap max-w-md break-words text-right">{entry.answer}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
