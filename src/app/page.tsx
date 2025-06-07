@@ -34,17 +34,17 @@ export default function HomePage() {
         </header>
 
         <section className="mb-8 p-6 bg-card rounded-xl shadow-lg text-center text-card-foreground">
-          <p className="text-xl leading-relaxed mb-6">
+          <p className="text-2xl leading-relaxed mb-6">
             يهدف هذا التطبيق لتقديم معلومات ودعم في كل ما يخص صحة المرأة، بما في ذلك الحمل والولادة، العناية بعد الولادة، تنظيم الأسرة، وغيرها من المواضيع الهامة. صحتكِ هي أولويتنا.
           </p>
-          <p className="text-xl font-semibold text-primary mb-4">
+          <p className="text-2xl font-semibold text-primary mb-4">
             تحت إشراف: أ.د/ عايدة عبدالرازق
           </p>
-          <p className="text-base text-muted-foreground mb-6">
+          <p className="text-lg text-muted-foreground mb-6">
             أستاذ صحة المرأة - كلية التمريض، جامعة المنوفية
           </p>
-          <div className="flex items-center justify-center gap-2 text-primary font-semibold mb-4">
-            <Phone size={20} />
+          <div className="flex items-center justify-center gap-2 text-primary font-semibold mb-4 text-lg">
+            <Phone size={22} /> {/* Slightly increased icon size to match text */}
             <span>للتواصل: 01205342194</span>
           </div>
         </section>
