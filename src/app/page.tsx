@@ -17,10 +17,6 @@ export default function HomePage() {
           <div 
             className="inline-flex items-center justify-center gap-x-2 sm:gap-x-4 bg-white/80 text-primary py-4 px-6 rounded-2xl shadow-lg"
           >
-            <Heart size={36} className="text-primary order-last sm:order-first" /> 
-            <h1 className="font-headline text-3xl sm:text-4xl font-bold text-center mx-2 sm:mx-0">
-              صحتكِ تهمنا
-            </h1>
             <Image
               src="https://be13a6bfb72b1843b287a4c59c4f4174.cdn.bubble.io/f1749070664202x663207571008088400/8624f5b1-c5a3-438a-bbfa-4c1deda79052.jpg"
               alt="أ.د/ عايدة عبدالرازق"
@@ -30,17 +26,21 @@ export default function HomePage() {
               data-ai-hint="doctor portrait"
               priority
             />
+            <h1 className="font-headline text-3xl sm:text-4xl font-bold text-center mx-2 sm:mx-0">
+              صحتكِ تهمنا
+            </h1>
+            <Heart size={36} className="text-primary order-last sm:order-first" /> 
           </div>
         </header>
 
         <section className="mb-8 p-6 bg-card rounded-xl shadow-lg text-center text-card-foreground">
-          <p className="text-lg leading-relaxed mb-6">
+          <p className="text-xl leading-relaxed mb-6">
             يهدف هذا التطبيق لتقديم معلومات ودعم في كل ما يخص صحة المرأة، بما في ذلك الحمل والولادة، العناية بعد الولادة، تنظيم الأسرة، وغيرها من المواضيع الهامة. صحتكِ هي أولويتنا.
           </p>
-          <p className="text-md font-semibold text-primary mb-3">
+          <p className="text-xl font-semibold text-primary mb-4">
             تحت إشراف: أ.د/ عايدة عبدالرازق
           </p>
-          <p className="text-sm text-muted-foreground mb-6">
+          <p className="text-base text-muted-foreground mb-6">
             أستاذ صحة المرأة - كلية التمريض، جامعة المنوفية
           </p>
           <div className="flex items-center justify-center gap-2 text-primary font-semibold mb-4">
