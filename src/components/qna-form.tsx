@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -163,8 +163,8 @@ export function QnaForm() {
 
             {selectedStageInfo && (
               <Card className="mt-4 bg-background border-primary/30 shadow-md text-right" dir="rtl">
-                <CardHeader className="w-full pb-2 flex flex-col items-end">
-                  <CardTitle className="w-full text-xl font-headline text-primary flex items-center gap-2 justify-end">
+                <CardHeader className="w-full pb-2 flex flex-col items-start">
+                  <CardTitle className="w-full text-xl font-headline text-primary flex items-center gap-2 justify-start">
                     <Info size={20}/> <span>معلومات حول: {selectedStageInfo.label}</span>
                   </CardTitle>
                   <CardDescription className="w-full text-right">
@@ -263,3 +263,4 @@ export function QnaForm() {
   );
 }
 
+    
