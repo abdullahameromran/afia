@@ -66,12 +66,14 @@ export function QnaForm() {
     
     const matchedStage = getLifeStageFromAge(Number(ageValue));
     const textualAgeLabel = matchedStage ? matchedStage.label : "مرحلة عمرية غير محددة";
+    const numericAgeForAIContext = matchedStage ? matchedStage.averageAge : Number(ageValue);
+
 
     const inputPayload: AnswerWomensHealthQuestionInput = {
       question,
       userName: username,
-      numericAgeForAI: Number(ageValue), // Send the direct numeric age
-      textualAgeLabel: textualAgeLabel, // Send the mapped textual label
+      numericAgeForAI: Number(ageValue), // Send the direct numeric age entered by user
+      textualAgeLabel: textualAgeLabel, // Send the mapped textual label based on entered age
     };
     
     try {
@@ -170,6 +172,7 @@ export function QnaForm() {
               )}
             />
 
+            {/* 
             {selectedStageInfo && (
               <Card className="mt-4 bg-background border-primary/30 shadow-md" dir="rtl">
                 <CardHeader className="w-full pb-2 flex flex-col items-start">
@@ -186,8 +189,7 @@ export function QnaForm() {
                       <AccordionItem value={`item-${index}`} key={section.title}>
                         <AccordionTrigger className="font-semibold hover:no-underline text-primary/90 text-right justify-between w-full">
                           <span className="text-right flex-grow">{section.title}</span>
-                          {/* ChevronDown is part of AccordionTrigger by default */}
-                          </AccordionTrigger>
+                        </AccordionTrigger>
                         <AccordionContent className="text-right space-y-2 pt-2 pr-2">
                           {section.description && <p className="text-sm text-muted-foreground text-right">{section.description}</p>}
                           {section.subsections && renderSubsections(section.subsections)}
@@ -210,6 +212,7 @@ export function QnaForm() {
                 </CardContent>
               </Card>
             )}
+            */}
 
             <FormField
               control={form.control}
