@@ -63,7 +63,7 @@ const lifeStageSectionsData = [
   {
     id: 'teen',
     title: '1. مرحلة المراهقة',
-    Icon: Users2, // Changed from School
+    Icon: Activity, 
     cardClasses: "bg-rose-50 border-rose-200",
     headerClasses: "bg-rose-100",
     titleTextClass: "text-rose-700",
@@ -123,7 +123,7 @@ const lifeStageSectionsData = [
   {
     id: 'pregnancy',
     title: '2. العناية بالحمل والولادة وما بعدها',
-    Icon: Stethoscope, // Changed from HeartHandshake
+    Icon: Baby, 
     cardClasses: "bg-sky-50 border-sky-200",
     headerClasses: "bg-sky-100",
     titleTextClass: "text-sky-700",
@@ -149,7 +149,7 @@ const lifeStageSectionsData = [
       },
       {
         title: 'ب. أثناء الحمل',
-        Icon: Baby,
+        Icon: Stethoscope, // Kept Stethoscope here as it's a sub-section icon
         subsections: [
            {
             title: 'العناية حسب الثلث',
@@ -211,7 +211,7 @@ const lifeStageSectionsData = [
   {
     id: 'menopause',
     title: '3. مرحلة سن الأمل',
-    Icon: Leaf, // Changed from Sunrise
+    Icon: HeartPulse, 
     cardClasses: "bg-purple-50 border-purple-200",
     headerClasses: "bg-purple-100",
     titleTextClass: "text-purple-700",
@@ -240,7 +240,7 @@ const lifeStageSectionsData = [
       },
       {
         title: 'العناية الصحية',
-        Icon: Activity,
+        Icon: ShieldCheck, // Changed from Activity to be more specific
         tips: [
           {
             title: 'التغذية',
@@ -331,7 +331,7 @@ export default function HomePage() {
                   <CardHeader className={cn("py-4 px-4 md:px-6 md:py-5", stage.headerClasses)}>
                     <CardTitle className={cn("text-2xl font-headline flex items-center justify-between w-full", stage.titleTextClass)}>
                       <div className="flex items-center gap-3">
-                        <StageIcon size={28} />
+                        <StageIcon size={32} /> {/* Increased size */}
                         <span>{stage.title.replace(/\s*\(.*?\)\s*/g, '')}</span>
                       </div>
                       <DialogTrigger asChild>
@@ -347,7 +347,7 @@ export default function HomePage() {
                 <DialogContent className="sm:max-w-2xl max-h-[85vh] bg-card text-right flex flex-col" dir="rtl">
                   <DialogHeader className="border-b pb-3 mb-1 sticky top-0 bg-card z-10 pt-2">
                     <DialogTitle className={cn("font-headline text-2xl text-right flex items-center gap-2", stage.dialogTitleTextClass)}>
-                      <StageIcon size={28} />
+                      <StageIcon size={32} /> {/* Increased size */}
                       تفاصيل: {stage.title.substring(stage.title.indexOf(' ') + 1).replace(/\s*\(.*?\)\s*/g, '')}
                     </DialogTitle>
                     <DialogDescription className="text-right text-muted-foreground">
@@ -400,7 +400,7 @@ export default function HomePage() {
           <Card className="bg-emerald-50 border-emerald-200 shadow-lg overflow-hidden">
             <CardHeader className="bg-emerald-100">
               <CardTitle className="text-2xl font-headline text-emerald-700 flex items-center gap-3">
-                <Info size={28} /> {/* Changed from ListChecks */}
+                <BookOpenCheck size={32} /> {/* Changed Icon and Increased size */}
                 <span>نقاط رئيسية للتثقيف الصحي عبر المراحل</span>
               </CardTitle>
             </CardHeader>
