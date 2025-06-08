@@ -32,7 +32,7 @@ export default function HomePage() {
       <div className="w-full max-w-3xl"> {/* Increased max-width for new section */}
         <header className="mb-8 text-center">
           <div
-            className="inline-flex items-center justify-center gap-x-2 sm:gap-x-4 bg-white/80 text-primary py-4 px-6 rounded-2xl shadow-lg"
+            className="inline-flex items-center justify-center gap-x-2 sm:gap-x-4 bg-card text-primary py-4 px-6 rounded-2xl shadow-lg"
           >
             <Image
               src="https://be13a6bfb72b1843b287a4c59c4f4174.cdn.bubble.io/f1749070664202x663207571008088400/8624f5b1-c5a3-438a-bbfa-4c1deda79052.jpg"
@@ -78,9 +78,9 @@ export default function HomePage() {
           </header>
 
           {/* 1. مرحلة المراهقة (13–16 سنة) */}
-          <Card className="bg-primary/5 border-primary/30 shadow-lg overflow-hidden">
-            <CardHeader className="bg-primary/10">
-              <CardTitle className="text-2xl font-headline text-primary flex items-center gap-3">
+          <Card className="bg-rose-50 border-rose-200 shadow-lg overflow-hidden">
+            <CardHeader className="bg-rose-100">
+              <CardTitle className="text-2xl font-headline text-rose-700 flex items-center gap-3">
                 <School size={28} />
                 <span>1. مرحلة المراهقة (13–16 سنة)</span>
               </CardTitle>
@@ -88,7 +88,7 @@ export default function HomePage() {
             <CardContent className="p-4 md:p-6">
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="teen-physiological">
-                  <AccordionTrigger className="text-lg font-semibold text-primary hover:no-underline">
+                  <AccordionTrigger className="text-lg font-semibold text-rose-600 hover:no-underline">
                     <div className="flex items-center gap-2"><Zap size={20} />التغيرات الفسيولوجية</div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pr-2 space-y-2 text-foreground/90">
@@ -101,7 +101,7 @@ export default function HomePage() {
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="teen-health-signs">
-                  <AccordionTrigger className="text-lg font-semibold text-primary hover:no-underline">
+                  <AccordionTrigger className="text-lg font-semibold text-rose-600 hover:no-underline">
                     <div className="flex items-center gap-2"><HeartPulse size={20} />العلامات الصحية</div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pr-2 space-y-2 text-foreground/90">
@@ -112,7 +112,7 @@ export default function HomePage() {
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="teen-health-education">
-                  <AccordionTrigger className="text-lg font-semibold text-primary hover:no-underline">
+                  <AccordionTrigger className="text-lg font-semibold text-rose-600 hover:no-underline">
                     <div className="flex items-center gap-2"><BookOpenCheck size={20} />التثقيف الصحي</div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pr-2 space-y-3 text-foreground/90">
@@ -143,18 +143,18 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          {/* 2. مرحلة الإنجاب (18–48 سنة) */}
-          <Card className="bg-secondary/10 border-secondary/40 shadow-lg overflow-hidden">
-            <CardHeader className="bg-secondary/20">
-              <CardTitle className="text-2xl font-headline text-primary flex items-center gap-3">
+          {/* 2. العناية بالحمل والولادة وما بعدها */}
+          <Card className="bg-sky-50 border-sky-200 shadow-lg overflow-hidden">
+            <CardHeader className="bg-sky-100">
+              <CardTitle className="text-2xl font-headline text-sky-700 flex items-center gap-3">
                 <HeartHandshake size={28} />
-                <span>2. مرحلة الإنجاب (18–48 سنة)</span>
+                <span>2. العناية بالحمل والولادة وما بعدها</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 md:p-6">
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="repro-pre-pregnancy">
-                  <AccordionTrigger className="text-lg font-semibold text-primary hover:no-underline">
+                  <AccordionTrigger className="text-lg font-semibold text-sky-600 hover:no-underline">
                     <div className="flex items-center gap-2"><CalendarCheck size={20} />أ. قبل الحمل</div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pr-2 space-y-3 text-foreground/90">
@@ -174,7 +174,7 @@ export default function HomePage() {
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="repro-during-pregnancy">
-                  <AccordionTrigger className="text-lg font-semibold text-primary hover:no-underline">
+                  <AccordionTrigger className="text-lg font-semibold text-sky-600 hover:no-underline">
                      <div className="flex items-center gap-2"><Baby size={20} />ب. أثناء الحمل</div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pr-2 space-y-3 text-foreground/90">
@@ -192,7 +192,7 @@ export default function HomePage() {
                   </AccordionContent>
                 </AccordionItem>
                  <AccordionItem value="repro-birth">
-                  <AccordionTrigger className="text-lg font-semibold text-primary hover:no-underline">
+                  <AccordionTrigger className="text-lg font-semibold text-sky-600 hover:no-underline">
                     <div className="flex items-center gap-2"><BedDouble size={20} />ج. الولادة</div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pr-2 space-y-3 text-foreground/90">
@@ -212,7 +212,7 @@ export default function HomePage() {
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="repro-postpartum">
-                  <AccordionTrigger className="text-lg font-semibold text-primary hover:no-underline">
+                  <AccordionTrigger className="text-lg font-semibold text-sky-600 hover:no-underline">
                     <div className="flex items-center gap-2"><HelpingHand size={20} />د. ما بعد الولادة</div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pr-2 space-y-3 text-foreground/90">
@@ -237,9 +237,9 @@ export default function HomePage() {
           </Card>
 
           {/* 3. مرحلة سن الأمل (48–55 سنة) */}
-          <Card className="bg-muted/20 border-muted/50 shadow-lg overflow-hidden">
-            <CardHeader className="bg-muted/30">
-              <CardTitle className="text-2xl font-headline text-muted-foreground flex items-center gap-3">
+          <Card className="bg-purple-50 border-purple-200 shadow-lg overflow-hidden">
+            <CardHeader className="bg-purple-100">
+              <CardTitle className="text-2xl font-headline text-purple-700 flex items-center gap-3">
                 <Sunrise size={28} />
                 <span>3. مرحلة سن الأمل (48–55 سنة)</span>
               </CardTitle>
@@ -247,7 +247,7 @@ export default function HomePage() {
             <CardContent className="p-4 md:p-6">
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="meno-physiological">
-                  <AccordionTrigger className="text-lg font-semibold text-muted-foreground hover:no-underline">
+                  <AccordionTrigger className="text-lg font-semibold text-purple-600 hover:no-underline">
                      <div className="flex items-center gap-2"><Replace size={20} />التغيرات الفسيولوجية</div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pr-2 space-y-3 text-foreground/90">
@@ -268,7 +268,7 @@ export default function HomePage() {
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="meno-health-care">
-                  <AccordionTrigger className="text-lg font-semibold text-muted-foreground hover:no-underline">
+                  <AccordionTrigger className="text-lg font-semibold text-purple-600 hover:no-underline">
                     <div className="flex items-center gap-2"><Activity size={20} />العناية الصحية</div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pr-2 space-y-3 text-foreground/90">
@@ -300,14 +300,14 @@ export default function HomePage() {
           </Card>
 
           {/* نقاط رئيسية للتثقيف الصحي */}
-          <Card className="bg-teal-500/5 border-teal-500/30 shadow-lg overflow-hidden">
-            <CardHeader className="bg-teal-500/10">
-              <CardTitle className="text-2xl font-headline text-teal-700 flex items-center gap-3">
+          <Card className="bg-emerald-50 border-emerald-200 shadow-lg overflow-hidden">
+            <CardHeader className="bg-emerald-100">
+              <CardTitle className="text-2xl font-headline text-emerald-700 flex items-center gap-3">
                 <ListChecks size={28} />
                 <span>نقاط رئيسية للتثقيف الصحي عبر المراحل</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-4 md:p-6 text-teal-800/90">
+            <CardContent className="p-4 md:p-6 text-emerald-800/90">
               <ul className="space-y-3">
                 <ListItem>البلوغ: تعليم الفتيات عن الدورة الشهرية والنظافة.</ListItem>
                 <ListItem>الإنجاب: التشديد على الرعاية السابقة للحمل والفحوصات الدورية.</ListItem>
@@ -429,4 +429,3 @@ export default function HomePage() {
     </main>
   );
 }
-

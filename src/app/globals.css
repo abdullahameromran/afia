@@ -4,41 +4,41 @@
 
 @layer base {
   :root {
-    --background: 340 67% 95%; /* #FCE4EC - Very light pink */
-    --foreground: 0 0% 20%; /* #333333 - Dark gray */
+    --background: 350 100% 98%; /* #FFF5F7 - Very light, slightly desaturated pink */
+    --foreground: 340 10% 30%; /* #524A4C - Dark, slightly warm gray */
 
-    --card: 336 100% 98%; /* #FFF3F8 - Lighter pink for response card background */
-    --card-foreground: 0 0% 20%; /* Dark gray for text on card */
+    --card: 0 0% 100%; /* White for cards */
+    --card-foreground: 340 10% 30%; /* Dark gray for text on card */
 
-    --popover: 336 100% 98%;
-    --popover-foreground: 0 0% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 340 10% 30%;
 
-    --primary: 337 77% 48%; /* #D81B60 - Dusty rose */
+    --primary: 345 75% 65%; /* #E97A95 - Soft Coral Pink */
     --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 281 40% 90%; /* #E8D9EC - Lighter shade of pastel purple */
-    --secondary-foreground: 337 77% 48%; /* Primary color for text on secondary */
+    --secondary: 25 80% 92%; /* #FBE8E0 - Very Light Peach */
+    --secondary-foreground: 345 50% 45%; /* #B55C73 - Muted Coral for text on secondary */
 
-    --muted: 340 60% 90%; /* #F3DFE6 - Muted pink */
-    --muted-foreground: 340 20% 50%; /* #A68C94 - Muted pink text */
+    --muted: 350 70% 94%; /* #FBEAF0 - Muted light pink */
+    --muted-foreground: 350 20% 55%; /* #A69097 - Muted pink text */
 
-    --accent: 281 36% 81%; /* #E0BBE4 - Light pastel purple */
-    --accent-foreground: 0 0% 100%; /* White text for good contrast */
+    --accent: 300 60% 90%; /* #E6D9F2 - Soft Lavender */
+    --accent-foreground: 300 40% 30%; /* Darker lavender for text on accent */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 70% 55%; /* #D95C5C - Softer Red */
+    --destructive-foreground: 0 0% 100%; /* White */
 
-    --border: 340 30% 85%; /* #E1CCD2 - Light pinkish border */
-    --input: 340 30% 85%; /* Border color for inputs */
-    --ring: 337 77% 48%; /* Primary color for focus rings */
+    --border: 350 50% 90%; /* #F5DDE5 - Light pinkish border */
+    --input: 350 40% 88%; /* #EDDCE2 - Slightly darker pinkish for input */
+    --ring: 345 75% 65%; /* Primary color for focus rings */
 
-    --radius: 0.75rem; /* 12px, from user's original CSS for inputs */
+    --radius: 0.75rem; /* 12px */
 
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --chart-1: 345 75% 65%; /* Soft Coral Pink */
+    --chart-2: 25 80% 80%;  /* Light Peach */
+    --chart-3: 300 60% 75%; /* Lavender */
+    --chart-4: 40 80% 70%;  /* Soft Yellow-Orange */
+    --chart-5: 180 40% 70%; /* Soft Teal/Mint */
 
     /* Sidebar variables, can keep default or adjust if sidebar is used */
     --sidebar-background: 0 0% 98%;
@@ -53,31 +53,39 @@
 
   .dark {
     /* Define dark theme colors if needed, for now maintain consistency or use defaults */
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 337 77% 48%; /* Keep primary consistent */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 281 30% 15%; /* Darker purple */
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 281 36% 70%; /* Slightly desaturated accent for dark mode */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 337 77% 48%; /* Keep ring primary */
+    --background: 340 10% 15%; /* #2B2426 - Very dark warm gray/purple */
+    --foreground: 350 100% 98%; /* Very light pink for text */
 
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --card: 340 8% 20%; /* #383133 - Darker card background */
+    --card-foreground: 350 100% 98%;
+
+    --popover: 340 8% 20%;
+    --popover-foreground: 350 100% 98%;
+
+    --primary: 345 75% 70%; /* #EE8DA5 - Brighter Coral Pink for dark mode */
+    --primary-foreground: 0 0% 10%; /* Dark text for contrast */
+
+    --secondary: 25 50% 25%; /* #4D3F3A - Dark Peach */
+    --secondary-foreground: 25 80% 92%; /* Light Peach for text */
+
+    --muted: 350 40% 30%; /* #664F58 - Muted dark pink */
+    --muted-foreground: 350 70% 80%; /* #D1B8C0 - Muted light pink text */
+
+    --accent: 300 40% 35%; /* #5C4A6B - Dark Lavender */
+    --accent-foreground: 300 60% 90%; /* Light Lavender for text */
+    
+    --destructive: 0 60% 50%; /* #CC4D4D */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 350 20% 30%; /* #5C5255 - Pinkish dark border */
+    --input: 350 20% 35%; /* #665C5F - Slightly lighter input border */
+    --ring: 345 75% 70%; /* Primary color for focus rings */
+
+    --chart-1: 345 75% 70%;
+    --chart-2: 25 80% 75%;
+    --chart-3: 300 60% 70%;
+    --chart-4: 40 80% 65%;
+    --chart-5: 180 40% 65%;
     /* Sidebar dark variables */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
