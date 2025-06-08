@@ -313,7 +313,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="my-12 space-y-8" dir="rtl">
+        <section className="my-12" dir="rtl">
           <header className="text-center mb-10">
             <h2 className="font-headline text-3xl sm:text-4xl font-bold text-primary">
               رحلة صحة المرأة من المراهقة إلى سن الأمل
@@ -323,95 +323,111 @@ export default function HomePage() {
             </p>
           </header>
 
-          {lifeStageSectionsData.map((stage) => {
-            const StageIcon = stage.Icon;
-            return (
-              <Dialog key={stage.id}>
-                <Card className={cn("shadow-lg overflow-hidden", stage.cardClasses)}>
-                  <CardHeader className={cn("py-4 px-4 md:px-6 md:py-5", stage.headerClasses)}>
-                    <CardTitle className={cn("text-2xl font-headline flex items-center justify-between w-full", stage.titleTextClass)}>
-                      <div className="flex items-center gap-3">
-                        <StageIcon size={32} />
-                        <span>{stage.title.replace(/\s*\(.*?\)\s*/g, '')}</span>
-                      </div>
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className={cn("p-2 h-auto", stage.buttonClasses, "hover:" + stage.buttonClasses.replace("text-", "bg-").replace("-600", "-100"))}>
-                           <AlignJustify size={20} />
-                           <span className="mr-1 hidden sm:inline">التفاصيل</span>
-                        </Button>
-                      </DialogTrigger>
-                    </CardTitle>
-                  </CardHeader>
-                </Card>
-
-                <DialogContent className="sm:max-w-2xl max-h-[85vh] bg-card text-right flex flex-col" dir="rtl">
-                  <DialogHeader className="border-b pb-3 mb-1 sticky top-0 bg-card z-10 pt-2">
-                    <DialogTitle className={cn("font-headline text-2xl text-right flex items-center gap-2", stage.dialogTitleTextClass)}>
-                      <StageIcon size={32} />
-                      تفاصيل: {stage.title.substring(stage.title.indexOf(' ') + 1).replace(/\s*\(.*?\)\s*/g, '')}
-                    </DialogTitle>
-                    <DialogDescription className="text-right text-muted-foreground">
-                      معلومات شاملة حول هذه المرحلة الهامة في حياة المرأة.
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  <div className="py-2 space-y-6 overflow-y-auto flex-grow pr-1">
-                    {stage.info.map((section, index) => {
-                      const SectionIcon = section.Icon;
-                      return (
-                        <div key={index} className="mb-4 p-3 rounded-lg border bg-background/50 shadow-sm">
-                          <h3 className={cn("text-xl font-semibold mb-3 flex items-center gap-2", stage.dialogTitleTextClass)}>
-                            {SectionIcon && <SectionIcon size={22} />}
-                            {section.title}
-                          </h3>
-                          {section.description && <p className="text-sm text-muted-foreground mb-2">{section.description}</p>}
-                          {section.subsections && renderSubsections(section.subsections, stage.dialogTitleTextClass)}
-                          {section.points && renderPoints(section.points)}
-                          {section.tips && section.tips.map((tipCategory, tipIdx) => {
-                            const TipIcon = tipCategory.Icon;
-                            return (
-                                <div key={tipIdx} className="mt-2">
-                                  <h4 className={cn("font-semibold flex items-center gap-1 mb-1", stage.dialogTitleTextClass)}>
-                                    {TipIcon && <TipIcon size={18} />}
-                                    {tipCategory.title}:
-                                  </h4>
-                                  <ul className="space-y-1 pr-4 list-none">
-                                    {tipCategory.points.map((point, i) => <ListItem key={i}>{point}</ListItem>)}
-                                  </ul>
-                                </div>
-                            );
-                          })}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            {lifeStageSectionsData.map((stage) => {
+              const StageIcon = stage.Icon;
+              return (
+                <Dialog key={stage.id}>
+                  <Card className={cn("shadow-lg overflow-hidden h-full flex flex-col", stage.cardClasses)}>
+                    <CardHeader className={cn("py-4 px-4 md:px-6 md:py-5", stage.headerClasses)}>
+                      <CardTitle className={cn("text-2xl font-headline flex items-center justify-between w-full", stage.titleTextClass)}>
+                        <div className="flex items-center gap-3">
+                          <StageIcon size={32} />
+                          <span>{stage.title.replace(/\s*\(.*?\)\s*/g, '')}</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                  <DialogFooter className="border-t pt-3 pb-2 mt-auto bg-card">
-                    <DialogClose asChild>
-                      <Button type="button" variant="outline" className="w-full sm:w-auto">
-                        إغلاق
-                      </Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            );
-          })}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 md:p-6 flex-grow flex flex-col justify-between">
+                        <p className="text-sm text-muted-foreground/90 mb-4">
+                            نظرة عامة حول التغيرات الصحية والاحتياجات خلال {stage.title.substring(stage.title.indexOf(' ') + 1).toLowerCase()}.
+                        </p>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className={cn("w-full mt-auto", stage.buttonClasses, "hover:" + stage.buttonClasses.replace("text-", "bg-").replace("-600", "-100"))}>
+                             <AlignJustify size={20} />
+                             <span className="mr-1">عرض التفاصيل</span>
+                          </Button>
+                        </DialogTrigger>
+                    </CardContent>
+                  </Card>
 
-          <Card className="bg-emerald-50 border-emerald-200 shadow-lg overflow-hidden">
-            <CardHeader className="bg-emerald-100">
-              <CardTitle className="text-2xl font-headline text-emerald-700 flex items-center gap-3">
-                <BookOpenCheck size={32} />
-                <span>نقاط رئيسية للتثقيف الصحي عبر المراحل</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 md:p-6 text-emerald-800/90">
-              <ul className="space-y-3 list-none">
-                <ListItem>البلوغ: تعليم الفتيات عن الدورة الشهرية والنظافة.</ListItem>
-                <ListItem>الإنجاب: التشديد على الرعاية السابقة للحمل والفحوصات الدورية.</ListItem>
-                <ListItem>سن الأمل: التركيز على منع هشاشة العظام وأمراض القلب.</ListItem>
-              </ul>
-            </CardContent>
-          </Card>
+                  <DialogContent className="sm:max-w-2xl max-h-[85vh] bg-card text-right flex flex-col" dir="rtl">
+                    <DialogHeader className="border-b pb-3 mb-1 sticky top-0 bg-card z-10 pt-2">
+                      <DialogTitle className={cn("font-headline text-2xl text-right flex items-center gap-2", stage.dialogTitleTextClass)}>
+                        <StageIcon size={32} />
+                        تفاصيل: {stage.title.substring(stage.title.indexOf(' ') + 1).replace(/\s*\(.*?\)\s*/g, '')}
+                      </DialogTitle>
+                      <DialogDescription className="text-right text-muted-foreground">
+                        معلومات شاملة حول هذه المرحلة الهامة في حياة المرأة.
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="py-2 space-y-6 overflow-y-auto flex-grow pr-1">
+                      {stage.info.map((section, index) => {
+                        const SectionIcon = section.Icon;
+                        return (
+                          <div key={index} className="mb-4 p-3 rounded-lg border bg-background/50 shadow-sm">
+                            <h3 className={cn("text-xl font-semibold mb-3 flex items-center gap-2", stage.dialogTitleTextClass)}>
+                              {SectionIcon && <SectionIcon size={22} />}
+                              {section.title}
+                            </h3>
+                            {section.description && <p className="text-sm text-muted-foreground mb-2">{section.description}</p>}
+                            {section.subsections && renderSubsections(section.subsections, stage.dialogTitleTextClass)}
+                            {section.points && renderPoints(section.points)}
+                            {section.tips && section.tips.map((tipCategory, tipIdx) => {
+                              const TipIcon = tipCategory.Icon;
+                              return (
+                                  <div key={tipIdx} className="mt-2">
+                                    <h4 className={cn("font-semibold flex items-center gap-1 mb-1", stage.dialogTitleTextClass)}>
+                                      {TipIcon && <TipIcon size={18} />}
+                                      {tipCategory.title}:
+                                    </h4>
+                                    <ul className="space-y-1 pr-4 list-none">
+                                      {tipCategory.points.map((point, i) => <ListItem key={i}>{point}</ListItem>)}
+                                    </ul>
+                                  </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <DialogFooter className="border-t pt-3 pb-2 mt-auto bg-card">
+                      <DialogClose asChild>
+                        <Button type="button" variant="outline" className="w-full sm:w-auto">
+                          إغلاق
+                        </Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              );
+            })}
+
+            <Card className="bg-emerald-50 border-emerald-200 shadow-lg overflow-hidden h-full flex flex-col">
+              <CardHeader className="bg-emerald-100 py-4 px-4 md:px-6 md:py-5">
+                <CardTitle className="text-2xl font-headline text-emerald-700 flex items-center gap-3">
+                  <BookOpenCheck size={32} />
+                  <span>نقاط رئيسية للتثقيف الصحي</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 md:p-6 text-emerald-800/90 flex-grow flex flex-col justify-between">
+                <div>
+                    <p className="text-sm text-muted-foreground/90 mb-4">
+                        ملخص لأهم الإرشادات الصحية العامة التي يجب مراعاتها في مختلف مراحل حياة المرأة.
+                    </p>
+                    <ul className="space-y-3 list-none">
+                        <ListItem>البلوغ: تعليم الفتيات عن الدورة الشهرية والنظافة.</ListItem>
+                        <ListItem>الإنجاب: التشديد على الرعاية السابقة للحمل والفحوصات الدورية.</ListItem>
+                        <ListItem>سن الأمل: التركيز على منع هشاشة العظام وأمراض القلب.</ListItem>
+                    </ul>
+                </div>
+                {/* Potentially add a button here if this card were to also become a dialog, but per current structure it's direct content */}
+                {/* <Button variant="outline" className="w-full mt-auto text-emerald-600 border-emerald-300 hover:bg-emerald-100">
+                    اقرئي المزيد (مثال)
+                </Button> */}
+              </CardContent>
+            </Card>
+          </div>
         </section>
 
         <ClientQnaFormWrapper />
@@ -538,5 +554,3 @@ export default function HomePage() {
     </main>
   );
 }
-
-    
