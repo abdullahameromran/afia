@@ -20,7 +20,7 @@ import { answerWomensHealthQuestion, type AnswerWomensHealthQuestionInput, type 
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "الرجاء إدخال اسمكِ" }),
-  lifeStage: z.coerce // Use coerce for inputs that might start as strings
+  lifeStage: z.coerce // This field now represents numeric age
     .number({ invalid_type_error: "الرجاء إدخال العمر كأرقام." })
     .min(10, { message: "العمر يجب أن يكون 10 سنوات على الأقل." })
     .max(120, { message: "الرجاء إدخال عمر صحيح (حتى 120 سنة)." })
@@ -41,7 +41,7 @@ export function QnaForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: '',
-      lifeStage: undefined, // Will be a number
+      lifeStage: '', // Changed from undefined to empty string
       question: '',
     },
   });
@@ -49,8 +49,16 @@ export function QnaForm() {
   const watchedAge = form.watch('lifeStage');
 
   useEffect(() => {
-    if (watchedAge !== undefined && !isNaN(watchedAge)) {
-      const stage = getLifeStageFromAge(Number(watchedAge));
+    // watchedAge will be a string from the form input, or a number if coerced by RHF internally
+    let numericWatchedAge: number | undefined = undefined;
+    if (typeof watchedAge === 'string' && watchedAge !== '') {
+        numericWatchedAge = Number(watchedAge);
+    } else if (typeof watchedAge === 'number') {
+        numericWatchedAge = watchedAge;
+    }
+
+    if (numericWatchedAge !== undefined && !isNaN(numericWatchedAge)) {
+      const stage = getLifeStageFromAge(numericWatchedAge);
       setSelectedStageInfo(stage);
     } else {
       setSelectedStageInfo(null);
@@ -62,18 +70,18 @@ export function QnaForm() {
     setError(null);
     setResponse(null);
 
-    const { username, question, lifeStage: ageValue } = data;
+    // data.lifeStage will be a number here due to Zod coercion by react-hook-form's handleSubmit
+    const { username, question, lifeStage: ageValueNumber } = data; 
     
-    const matchedStage = getLifeStageFromAge(Number(ageValue));
+    const matchedStage = getLifeStageFromAge(ageValueNumber);
     const textualAgeLabel = matchedStage ? matchedStage.label : "مرحلة عمرية غير محددة";
-    const numericAgeForAIContext = matchedStage ? matchedStage.averageAge : Number(ageValue);
 
 
     const inputPayload: AnswerWomensHealthQuestionInput = {
       question,
       userName: username,
-      numericAgeForAI: Number(ageValue), // Send the direct numeric age entered by user
-      textualAgeLabel: textualAgeLabel, // Send the mapped textual label based on entered age
+      numericAgeForAI: ageValueNumber, 
+      textualAgeLabel: textualAgeLabel, 
     };
     
     try {
@@ -163,7 +171,7 @@ export function QnaForm() {
                       type="number"
                       placeholder="مثال: 25"
                       {...field}
-                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                      // value will be managed by react-hook-form, initially ''
                       className="shadow-inner text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </FormControl>
@@ -275,3 +283,4 @@ export function QnaForm() {
     </Card>
   );
 }
+
