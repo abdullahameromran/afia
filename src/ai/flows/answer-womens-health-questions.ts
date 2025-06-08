@@ -11,12 +11,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { createSupabaseServiceRoleClient } from '@/lib/supabaseClient'; // Using service role client for server-side
+import { createSupabaseServiceRoleClient } from '@/lib/supabaseClient'; 
 
 const AnswerWomensHealthQuestionInputSchema = z.object({
   question: z.string().describe('The question about women\'s health.'),
   userName: z.string().optional().describe('The name of the user asking the question.'),
-  age: z.number().optional().describe('The age of the user asking the question.')
+  age: z.string().optional().describe('The life stage label selected by the user (e.g., "مرحلة البلوغ (13–16 سنة)").') // Changed from number to string
 });
 
 export type AnswerWomensHealthQuestionInput = z.infer<typeof AnswerWomensHealthQuestionInputSchema>;
@@ -52,8 +52,8 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
         .insert([
           { 
             question: input.question,
-            userName: input.userName || null, // Supabase handles null for optional fields
-            age: input.age || null,
+            userName: input.userName || null, 
+            age: input.age || null, // Will now be the string label or null
             answer: flowResult.answer,
             // timestamp is handled by DB default NOW()
           }
@@ -61,7 +61,6 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
       if (error) {
         console.error("Error saving Q&A history to Supabase:", error);
-        // Decide if this error should be propagated or just logged
       } else {
         console.log("Q&A history saved to Supabase");
       }
@@ -92,14 +91,14 @@ An example of a good disclaimer structure (ensure it's naturally integrated into
 If a question is completely unrelated to women's health, pregnancy, childbirth, family planning, or general healthcare, then you should politely decline in Arabic, explaining that your expertise is limited to these health topics.
 
 If a user's name is provided, address them personally in your Arabic response.
-If age is provided, consider it to tailor the tone and detail of your Arabic response appropriately.
+If a life stage (age field) is provided (e.g., "مرحلة البلوغ (13–16 سنة)"), consider it to tailor the tone and detail of your Arabic response appropriately.
 
 User's Question: {{{question}}}
 {{#if userName}}
 User's name: {{{userName}}}
 {{/if}}
 {{#if age}}
-User's age: {{{age}}}
+User's life stage: {{{age}}}
 {{/if}}`,
 });
 

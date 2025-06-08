@@ -20,7 +20,7 @@ import { lifeStagesData, type LifeStage, type StageSection, type HealthTip, type
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "الرجاء إدخال اسمكِ" }),
-  lifeStage: z.string({ required_error: "الرجاء اختيار مرحلة عمرية" }),
+  lifeStage: z.string({ required_error: "الرجاء اختيار مرحلة عمرية" }), // This will be the ID of the stage
   question: z.string().min(10, { message: "الرجاء إدخال سؤال واضح (10 أحرف على الأقل)" }),
 });
 
@@ -45,7 +45,6 @@ export function QnaForm() {
   const handleStageChange = (stageId: string) => {
     const stage = lifeStagesData.find(s => s.id === stageId) || null;
     setSelectedStageInfo(stage);
-    // Also update the form value for submission
     form.setValue('lifeStage', stageId, { shouldValidate: true });
   };
 
@@ -55,19 +54,17 @@ export function QnaForm() {
     setResponse(null);
 
     const selectedStage = lifeStagesData.find(s => s.id === data.lifeStage);
-    const ageToPass = selectedStage ? selectedStage.averageAge : undefined;
+    const lifeStageLabelToPass = selectedStage ? selectedStage.label : undefined;
 
     try {
       const input: AnswerWomensHealthQuestionInput = {
         question: data.question,
         userName: data.username,
-        ...(ageToPass !== undefined && { age: ageToPass })
+        ...(lifeStageLabelToPass !== undefined && { age: lifeStageLabelToPass }) // Pass label as 'age'
       };
       const aiResponse: AnswerWomensHealthQuestionOutput = await answerWomensHealthQuestion(input);
       
       if (aiResponse && aiResponse.answer) {
-        // Modify the response to include username if available, and the AI's answer.
-        // The AI prompt is already designed to address the user by name if provided.
         setResponse(aiResponse.answer); 
       } else {
         throw new Error("لم يتمكن الذكاء الاصطناعي من إنشاء إجابة.");
@@ -88,11 +85,11 @@ export function QnaForm() {
   };
   
   const renderHealthTips = (tips: HealthTip[]) => (
-    <ul className="space-y-3 list-inside">
+    <ul className="space-y-3 list-inside text-right pr-4">
       {tips.map(tip => (
         <li key={tip.title}>
           <strong className="text-primary">{tip.title}:</strong>
-          <ul className="mr-4 mt-1 space-y-1 list-disc list-inside">
+          <ul className="mr-4 mt-1 space-y-1 list-disc list-inside text-right">
             {tip.points.map((point, i) => <li key={i} className="text-sm">{point}</li>)}
           </ul>
         </li>
@@ -101,11 +98,11 @@ export function QnaForm() {
   );
 
   const renderSubsections = (subsections: Subsection[]) => (
-     <ul className="space-y-3 list-inside">
+     <ul className="space-y-3 list-inside text-right pr-4">
       {subsections.map(subsection => (
         <li key={subsection.title}>
           <strong className="text-primary">{subsection.title}:</strong>
-          <ul className="mr-4 mt-1 space-y-1 list-disc list-inside">
+          <ul className="mr-4 mt-1 space-y-1 list-disc list-inside text-right">
             {subsection.details.map((detail, i) => <li key={i} className="text-sm">{detail}</li>)}
           </ul>
         </li>
@@ -114,7 +111,7 @@ export function QnaForm() {
   );
   
   const renderPoints = (points: string[]) => (
-    <ul className="mr-0 mt-1 space-y-1 list-disc list-inside">
+    <ul className="mr-0 mt-1 space-y-1 list-disc list-inside text-right pr-4">
         {points.map((point, i) => <li key={i} className="text-sm">{point}</li>)}
     </ul>
   );
@@ -130,11 +127,11 @@ export function QnaForm() {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="username">اسمكِ</FormLabel>
+                  <FormLabel htmlFor="username" className="block text-right">اسمكِ</FormLabel>
                   <FormControl>
                     <Input id="username" placeholder="اكتبي اسمكِ" {...field} className="text-right shadow-inner" />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-right" />
                 </FormItem>
               )}
             />
@@ -144,8 +141,8 @@ export function QnaForm() {
               name="lifeStage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>المرحلة العمرية</FormLabel>
-                  <Select onValueChange={handleStageChange} defaultValue={field.value}>
+                  <FormLabel className="block text-right">المرحلة العمرية</FormLabel>
+                  <Select onValueChange={handleStageChange} defaultValue={field.value} dir="rtl">
                     <FormControl>
                       <SelectTrigger className="text-right shadow-inner">
                         <SelectValue placeholder="اختاري مرحلتكِ العمرية" />
@@ -159,13 +156,13 @@ export function QnaForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-right" />
                 </FormItem>
               )}
             />
 
             {selectedStageInfo && (
-              <Card className="mt-4 bg-background border-primary/30 shadow-md">
+              <Card className="mt-4 bg-background border-primary/30 shadow-md text-right">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl font-headline text-primary flex items-center gap-2 justify-end">
                      معلومات حول: {selectedStageInfo.label} <Info size={20}/>
@@ -175,12 +172,14 @@ export function QnaForm() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
+                  <Accordion type="single" collapsible className="w-full" dir="rtl">
                     {selectedStageInfo.info.map((section, index) => (
                       <AccordionItem value={`item-${index}`} key={section.title}>
-                        <AccordionTrigger className="font-semibold hover:no-underline text-primary/90">{section.title}</AccordionTrigger>
-                        <AccordionContent className="text-right space-y-2 pt-2 pr-1">
-                          {section.description && <p className="text-sm text-muted-foreground">{section.description}</p>}
+                        <AccordionTrigger className="font-semibold hover:no-underline text-primary/90 text-right">
+                          <span>{section.title}</span>
+                          </AccordionTrigger>
+                        <AccordionContent className="text-right space-y-2 pt-2 pr-2">
+                          {section.description && <p className="text-sm text-muted-foreground text-right">{section.description}</p>}
                           {section.subsections && renderSubsections(section.subsections)}
                           {section.points && renderPoints(section.points)}
                           {section.tips && renderHealthTips(section.tips)}
@@ -189,8 +188,10 @@ export function QnaForm() {
                     ))}
                     {selectedStageInfo.generalSummaryPoints && selectedStageInfo.generalSummaryPoints.length > 0 && (
                        <AccordionItem value="general-summary">
-                         <AccordionTrigger className="font-semibold hover:no-underline text-primary/90">نقاط رئيسية للتثقيف الصحي</AccordionTrigger>
-                         <AccordionContent className="text-right space-y-1 pt-2 pr-1">
+                         <AccordionTrigger className="font-semibold hover:no-underline text-primary/90 text-right">
+                           <span>نقاط رئيسية للتثقيف الصحي</span>
+                           </AccordionTrigger>
+                         <AccordionContent className="text-right space-y-1 pt-2 pr-2">
                            {renderPoints(selectedStageInfo.generalSummaryPoints)}
                          </AccordionContent>
                        </AccordionItem>
@@ -205,7 +206,7 @@ export function QnaForm() {
               name="question"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="question">سؤالكِ المحدد</FormLabel>
+                  <FormLabel htmlFor="question" className="block text-right">سؤالكِ المحدد</FormLabel>
                   <FormControl>
                     <Textarea
                       id="question"
@@ -215,7 +216,7 @@ export function QnaForm() {
                       className="text-right shadow-inner min-h-[100px]"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-right" />
                 </FormItem>
               )}
             />
@@ -223,7 +224,7 @@ export function QnaForm() {
             <Button type="submit" disabled={isLoading} className="w-full font-bold text-lg py-3 h-auto">
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="ml-2 h-5 w-5 animate-spin" /> {/* Adjusted margin for RTL */}
                   جاري المعالجة...
                 </>
               ) : (
@@ -234,8 +235,8 @@ export function QnaForm() {
         </Form>
 
         {error && (
-          <div className="mt-6 p-4 bg-destructive/10 text-destructive border-r-4 border-destructive rounded flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+          <div className="mt-6 p-4 bg-destructive/10 text-destructive border-r-4 border-destructive rounded flex items-start gap-3 text-right">
+            <AlertTriangle className="h-5 w-5 flex-shrink-0 ml-2" /> {/* Adjusted margin for RTL */}
             <div>
               <p className="font-semibold">خطأ في الاتصال</p>
               <p className="text-sm">{error}</p>
@@ -245,7 +246,7 @@ export function QnaForm() {
 
         {response && !error && (
           <div className="mt-8 transition-opacity duration-500 ease-in-out opacity-100">
-            <Card className="bg-background border-r-[6px] border-primary shadow-md">
+            <Card className="bg-background border-r-[6px] border-primary shadow-md text-right">
               <CardHeader>
                 <CardTitle className="font-headline text-primary text-2xl text-right">الإجابة:</CardTitle>
               </CardHeader>
