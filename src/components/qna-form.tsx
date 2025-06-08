@@ -9,18 +9,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Loader2, AlertTriangle, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { answerWomensHealthQuestion, type AnswerWomensHealthQuestionInput, type AnswerWomensHealthQuestionOutput } from '@/ai/flows/answer-womens-health-questions';
+import { lifeStagesData, type LifeStage, type StageSection, type HealthTip, type Subsection } from '@/lib/lifeStagesData';
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "الرجاء إدخال اسمكِ" }),
-  age: z.preprocess(
-    (val) => (val === "" || val === null || val === undefined ? undefined : val),
-    z.coerce.number({invalid_type_error: "الرجاء إدخال عمر صحيح"}).positive({ message: "الرجاء إدخال عمر صحيح" }).optional()
-  ),
+  lifeStage: z.string({ required_error: "الرجاء اختيار مرحلة عمرية" }),
   question: z.string().min(10, { message: "الرجاء إدخال سؤال واضح (10 أحرف على الأقل)" }),
 });
 
@@ -30,33 +30,45 @@ export function QnaForm() {
   const [response, setResponse] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStageInfo, setSelectedStageInfo] = useState<LifeStage | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: '',
-      age: '' as unknown as undefined, // Initialize as empty string to make it controlled
+      lifeStage: undefined,
       question: '',
     },
   });
+
+  const handleStageChange = (stageId: string) => {
+    const stage = lifeStagesData.find(s => s.id === stageId) || null;
+    setSelectedStageInfo(stage);
+    // Also update the form value for submission
+    form.setValue('lifeStage', stageId, { shouldValidate: true });
+  };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
     setError(null);
     setResponse(null);
 
+    const selectedStage = lifeStagesData.find(s => s.id === data.lifeStage);
+    const ageToPass = selectedStage ? selectedStage.averageAge : undefined;
+
     try {
       const input: AnswerWomensHealthQuestionInput = {
         question: data.question,
         userName: data.username,
-        // Pass age only if it's defined after Zod validation
-        ...(data.age !== undefined && { age: data.age })
+        ...(ageToPass !== undefined && { age: ageToPass })
       };
       const aiResponse: AnswerWomensHealthQuestionOutput = await answerWomensHealthQuestion(input);
       
       if (aiResponse && aiResponse.answer) {
-        setResponse(`${data.username}، ${aiResponse.answer}`);
+        // Modify the response to include username if available, and the AI's answer.
+        // The AI prompt is already designed to address the user by name if provided.
+        setResponse(aiResponse.answer); 
       } else {
         throw new Error("لم يتمكن الذكاء الاصطناعي من إنشاء إجابة.");
       }
@@ -74,10 +86,38 @@ export function QnaForm() {
       setIsLoading(false);
     }
   };
+  
+  const renderHealthTips = (tips: HealthTip[]) => (
+    <ul className="space-y-3 list-inside">
+      {tips.map(tip => (
+        <li key={tip.title}>
+          <strong className="text-primary">{tip.title}:</strong>
+          <ul className="mr-4 mt-1 space-y-1 list-disc list-inside">
+            {tip.points.map((point, i) => <li key={i} className="text-sm">{point}</li>)}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  );
 
-  // When passing data to the AI, ensure age is correctly handled if it's undefined.
-  // The form data for 'age' will be a number if valid, or undefined if empty/optional.
-  const currentAge = form.watch('age');
+  const renderSubsections = (subsections: Subsection[]) => (
+     <ul className="space-y-3 list-inside">
+      {subsections.map(subsection => (
+        <li key={subsection.title}>
+          <strong className="text-primary">{subsection.title}:</strong>
+          <ul className="mr-4 mt-1 space-y-1 list-disc list-inside">
+            {subsection.details.map((detail, i) => <li key={i} className="text-sm">{detail}</li>)}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  );
+  
+  const renderPoints = (points: string[]) => (
+    <ul className="mr-0 mt-1 space-y-1 list-disc list-inside">
+        {points.map((point, i) => <li key={i} className="text-sm">{point}</li>)}
+    </ul>
+  );
 
 
   return (
@@ -101,36 +141,75 @@ export function QnaForm() {
 
             <FormField
               control={form.control}
-              name="age"
+              name="lifeStage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="age">عمركِ (اختياري)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      id="age" 
-                      type="number" 
-                      placeholder="اكتبي عمركِ" 
-                      {...field} 
-                      onChange={(e) => field.onChange(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                      value={field.value === undefined || field.value === null ? '' : String(field.value)}
-                      className="text-right shadow-inner [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
-                    />
-                  </FormControl>
+                  <FormLabel>المرحلة العمرية</FormLabel>
+                  <Select onValueChange={handleStageChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="text-right shadow-inner">
+                        <SelectValue placeholder="اختاري مرحلتكِ العمرية" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {lifeStagesData.map(stage => (
+                        <SelectItem key={stage.id} value={stage.id} className="text-right justify-end">
+                          {stage.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {selectedStageInfo && (
+              <Card className="mt-4 bg-background border-primary/30 shadow-md">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xl font-headline text-primary flex items-center gap-2 justify-end">
+                     معلومات حول: {selectedStageInfo.label} <Info size={20}/>
+                  </CardTitle>
+                  <CardDescription className="text-right">
+                    نقدم لكِ بعض المعلومات العامة حول هذه المرحلة. يمكنكِ طرح أسئلة أكثر تحديدًا أدناه.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Accordion type="single" collapsible className="w-full">
+                    {selectedStageInfo.info.map((section, index) => (
+                      <AccordionItem value={`item-${index}`} key={section.title}>
+                        <AccordionTrigger className="font-semibold hover:no-underline text-primary/90">{section.title}</AccordionTrigger>
+                        <AccordionContent className="text-right space-y-2 pt-2 pr-1">
+                          {section.description && <p className="text-sm text-muted-foreground">{section.description}</p>}
+                          {section.subsections && renderSubsections(section.subsections)}
+                          {section.points && renderPoints(section.points)}
+                          {section.tips && renderHealthTips(section.tips)}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                    {selectedStageInfo.generalSummaryPoints && selectedStageInfo.generalSummaryPoints.length > 0 && (
+                       <AccordionItem value="general-summary">
+                         <AccordionTrigger className="font-semibold hover:no-underline text-primary/90">نقاط رئيسية للتثقيف الصحي</AccordionTrigger>
+                         <AccordionContent className="text-right space-y-1 pt-2 pr-1">
+                           {renderPoints(selectedStageInfo.generalSummaryPoints)}
+                         </AccordionContent>
+                       </AccordionItem>
+                    )}
+                  </Accordion>
+                </CardContent>
+              </Card>
+            )}
 
             <FormField
               control={form.control}
               name="question"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="question">سؤالكِ</FormLabel>
+                  <FormLabel htmlFor="question">سؤالكِ المحدد</FormLabel>
                   <FormControl>
                     <Textarea
                       id="question"
-                      placeholder="ما هو سؤالكِ؟"
+                      placeholder="بعد الاطلاع على المعلومات، ما هو سؤالكِ المحدد؟"
                       rows={4}
                       {...field}
                       className="text-right shadow-inner min-h-[100px]"
