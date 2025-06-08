@@ -91,14 +91,12 @@ export function OvulationTracker() {
   const calculateOvulation = (lastDate: Date, length: number) => {
     if (isValid(lastDate) && length) {
       const nextPeriodDate = addDays(lastDate, length);
-      // Ovulation typically occurs ~14 days before the next period
       const ovulationDate = subDays(nextPeriodDate, 14); 
-      // Fertile window is roughly 5 days before ovulation + ovulation day
       const windowStart = subDays(ovulationDate, 5);
 
       setEstimatedOvulationDate(format(ovulationDate, 'PPP', { locale: arSA }));
       setFertileWindowStart(format(windowStart, 'PPP', { locale: arSA }));
-      setFertileWindowEnd(format(ovulationDate, 'PPP', { locale: arSA })); // End of fertile window is ovulation day
+      setFertileWindowEnd(format(ovulationDate, 'PPP', { locale: arSA })); 
     } else {
       setEstimatedOvulationDate(null);
       setFertileWindowStart(null);

@@ -65,7 +65,7 @@ export function PeriodTracker() {
         }
         if (typeof parsedData.cycleLength === 'number' && parsedData.cycleLength >= 15 && parsedData.cycleLength <= 45) {
           validatedDefaultValues.cycleLength = parsedData.cycleLength;
-        } else if (lastPeriodDateAsDate) { // If we have a date but no valid cycle length, keep default
+        } else if (lastPeriodDateAsDate) { 
             validatedDefaultValues.cycleLength = 28;
         }
 
@@ -100,7 +100,7 @@ export function PeriodTracker() {
   const onSubmit: SubmitHandler<PeriodFormValues> = (data) => {
     calculateNextPeriod(data.lastPeriodDate, data.cycleLength);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
-      lastPeriodDate: data.lastPeriodDate.toISOString(), // Store as ISO string
+      lastPeriodDate: data.lastPeriodDate.toISOString(), 
       cycleLength: data.cycleLength,
     }));
   };
@@ -193,5 +193,3 @@ export function PeriodTracker() {
     </div>
   );
 }
-
-    

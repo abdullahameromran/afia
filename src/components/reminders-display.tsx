@@ -6,17 +6,18 @@ import { format, addDays, subDays, parseISO, isValid } from 'date-fns';
 import { arSA } from 'date-fns/locale';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CalendarDays, Target, Info, BellRing } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const PERIOD_LOCAL_STORAGE_KEY = 'periodTrackerData';
 const OVULATION_LOCAL_STORAGE_KEY = 'ovulationTrackerData';
 
 interface StoredPeriodData {
-  lastPeriodDate: string; // ISO string
+  lastPeriodDate: string; 
   cycleLength: number;
 }
 
 interface StoredOvulationData {
-  lastPeriodDate: string; // ISO string
+  lastPeriodDate: string; 
   cycleLength: number;
 }
 
@@ -27,7 +28,10 @@ export function RemindersDisplay() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load Period Data
+    setIsLoading(true);
+    let periodDataLoaded = false;
+    let ovulationDataLoaded = false;
+
     try {
       const storedPeriodRaw = localStorage.getItem(PERIOD_LOCAL_STORAGE_KEY);
       if (storedPeriodRaw) {
@@ -36,13 +40,13 @@ export function RemindersDisplay() {
         if (isValid(lastDate) && storedPeriod.cycleLength) {
           const nextDate = addDays(lastDate, storedPeriod.cycleLength);
           setNextPeriodDate(format(nextDate, 'PPP', { locale: arSA }));
+          periodDataLoaded = true;
         }
       }
     } catch (error) {
       console.error("Error loading period reminder data:", error);
     }
 
-    // Load Ovulation Data
     try {
       const storedOvulationRaw = localStorage.getItem(OVULATION_LOCAL_STORAGE_KEY);
       if (storedOvulationRaw) {
@@ -55,6 +59,7 @@ export function RemindersDisplay() {
           
           setEstimatedOvulationDate(format(ovulationDate, 'PPP', { locale: arSA }));
           setFertileWindow(`من ${format(windowStart, 'PPP', { locale: arSA })} إلى ${format(ovulationDate, 'PPP', { locale: arSA })}`);
+          ovulationDataLoaded = true;
         }
       }
     } catch (error) {
@@ -64,7 +69,13 @@ export function RemindersDisplay() {
   }, []);
 
   if (isLoading) {
-    return <p className="text-center text-muted-foreground">جاري تحميل التذكيرات...</p>;
+    return (
+        <div className="space-y-4 text-right">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+    );
   }
 
   const hasReminders = nextPeriodDate || estimatedOvulationDate;
@@ -72,17 +83,17 @@ export function RemindersDisplay() {
   return (
     <div className="space-y-4 text-right">
       {!hasReminders && (
-        <Alert variant="default">
-          <Info className="h-4 w-4 ml-2" />
-          <AlertTitle>لا توجد تذكيرات محفوظة</AlertTitle>
-          <AlertDescription>
+        <Alert variant="default" className="bg-card border-border">
+          <Info className="h-5 w-5 text-primary ml-2" />
+          <AlertTitle className="font-semibold text-primary">لا توجد تذكيرات محفوظة</AlertTitle>
+          <AlertDescription className="text-muted-foreground">
             قومي باستخدام أداتي "متابعة الدورة" و "متابعة التبويض" أولاً لحفظ بياناتكِ وظهور التذكيرات هنا.
           </AlertDescription>
         </Alert>
       )}
 
       {nextPeriodDate && (
-        <Alert variant="default" className="bg-secondary/30 border-secondary">
+        <Alert variant="default" className="bg-secondary/20 border-secondary text-secondary-foreground">
           <CalendarDays className="h-5 w-5 text-primary ml-2" />
           <AlertTitle className="font-semibold text-primary">تذكير بموعد الدورة القادمة</AlertTitle>
           <AlertDescription>
@@ -92,7 +103,7 @@ export function RemindersDisplay() {
       )}
 
       {estimatedOvulationDate && fertileWindow && (
-        <Alert variant="default" className="bg-accent/30 border-accent">
+        <Alert variant="default" className="bg-accent/20 border-accent text-accent-foreground">
           <Target className="h-5 w-5 text-primary ml-2" />
           <AlertTitle className="font-semibold text-primary">تذكير بفترة التبويض</AlertTitle>
           <AlertDescription>
@@ -103,10 +114,10 @@ export function RemindersDisplay() {
       )}
 
       {hasReminders && (
-         <Alert variant="default" className="mt-6">
-            <BellRing className="h-4 w-4 ml-2 text-primary" />
-            <AlertTitle>ملاحظة حول التنبيهات</AlertTitle>
-            <AlertDescription>
+         <Alert variant="default" className="mt-6 bg-card border-border">
+            <BellRing className="h-5 w-5 text-primary ml-2" />
+            <AlertTitle className="font-semibold text-primary">ملاحظة حول التنبيهات</AlertTitle>
+            <AlertDescription className="text-muted-foreground">
                 هذه تذكيرات بناءً على البيانات التي أدخلتيها. للحصول على تنبيهات فعالة، تأكدي من مراجعة التطبيق بانتظام.
             </AlertDescription>
         </Alert>
