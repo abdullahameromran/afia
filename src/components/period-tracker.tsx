@@ -86,7 +86,8 @@ export function PeriodTracker() {
         localStorage.removeItem(LOCAL_STORAGE_KEY); 
       }
     }
-  }, [form]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Changed dependency array to []
 
   const calculateNextPeriod = (lastDate: Date, length: number) => {
     if (isValid(lastDate) && length) {
@@ -193,3 +194,4 @@ export function PeriodTracker() {
     </div>
   );
 }
+

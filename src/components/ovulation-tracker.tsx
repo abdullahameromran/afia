@@ -86,7 +86,8 @@ export function OvulationTracker() {
         localStorage.removeItem(LOCAL_STORAGE_KEY); 
       }
     }
-  }, [form]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Changed dependency array to []
 
   const calculateOvulation = (lastDate: Date, length: number) => {
     if (isValid(lastDate) && length) {
@@ -201,3 +202,4 @@ export function OvulationTracker() {
     </div>
   );
 }
+
