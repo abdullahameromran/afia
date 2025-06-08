@@ -163,11 +163,11 @@ export function QnaForm() {
 
             {selectedStageInfo && (
               <Card className="mt-4 bg-background border-primary/30 shadow-md text-right" dir="rtl">
-                <CardHeader className="pb-2 flex flex-col items-end">
-                  <CardTitle className="text-xl font-headline text-primary flex items-center gap-2 justify-end">
-                     معلومات حول: {selectedStageInfo.label} <Info size={20}/>
+                <CardHeader className="w-full pb-2 flex flex-col items-end">
+                  <CardTitle className="w-full text-xl font-headline text-primary flex items-center gap-2 justify-end">
+                    <Info size={20}/> <span>معلومات حول: {selectedStageInfo.label}</span>
                   </CardTitle>
-                  <CardDescription className="text-right">
+                  <CardDescription className="w-full text-right">
                     نقدم لكِ بعض المعلومات العامة حول هذه المرحلة. يمكنكِ طرح أسئلة أكثر تحديدًا أدناه.
                   </CardDescription>
                 </CardHeader>
