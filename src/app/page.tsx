@@ -63,7 +63,7 @@ const lifeStageSectionsData = [
   {
     id: 'teen',
     title: '1. مرحلة المراهقة',
-    Icon: School,
+    Icon: Users2, // Changed from School
     cardClasses: "bg-rose-50 border-rose-200",
     headerClasses: "bg-rose-100",
     titleTextClass: "text-rose-700",
@@ -123,7 +123,7 @@ const lifeStageSectionsData = [
   {
     id: 'pregnancy',
     title: '2. العناية بالحمل والولادة وما بعدها',
-    Icon: HeartHandshake,
+    Icon: Stethoscope, // Changed from HeartHandshake
     cardClasses: "bg-sky-50 border-sky-200",
     headerClasses: "bg-sky-100",
     titleTextClass: "text-sky-700",
@@ -211,7 +211,7 @@ const lifeStageSectionsData = [
   {
     id: 'menopause',
     title: '3. مرحلة سن الأمل',
-    Icon: Sunrise,
+    Icon: Leaf, // Changed from Sunrise
     cardClasses: "bg-purple-50 border-purple-200",
     headerClasses: "bg-purple-100",
     titleTextClass: "text-purple-700",
@@ -400,7 +400,7 @@ export default function HomePage() {
           <Card className="bg-emerald-50 border-emerald-200 shadow-lg overflow-hidden">
             <CardHeader className="bg-emerald-100">
               <CardTitle className="text-2xl font-headline text-emerald-700 flex items-center gap-3">
-                <ListChecks size={28} />
+                <Info size={28} /> {/* Changed from ListChecks */}
                 <span>نقاط رئيسية للتثقيف الصحي عبر المراحل</span>
               </CardTitle>
             </CardHeader>
@@ -538,5 +538,3 @@ export default function HomePage() {
     </main>
   );
 }
-
-    
