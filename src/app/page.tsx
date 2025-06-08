@@ -9,29 +9,6 @@ import { OvulationTracker } from '@/components/ovulation-tracker';
 import { RemindersDisplay } from '@/components/reminders-display';
 import { Button } from '@/components/ui/button';
 
-const careStages = [
-  {
-    icon: Baby,
-    title: "العناية أثناء الحمل",
-    description: "متابعة صحتكِ وصحة جنينكِ خطوة بخطوة خلال رحلة الحمل."
-  },
-  {
-    icon: Hospital,
-    title: "العناية أثناء الولادة",
-    description: "دعم ورعاية متكاملة لضمان تجربة ولادة آمنة وإيجابية."
-  },
-  {
-    icon: Users,
-    title: "العناية بعد الولادة",
-    description: "الرعاية اللازمة لكِ ولصغيركِ للتعافي والنمو في فترة ما بعد الولادة."
-  },
-  {
-    icon: Flower2,
-    title: "العناية بسن الأمل",
-    description: "نصائح ودعم لاحتضان التغيير والحفاظ على صحتكِ وحيويتكِ."
-  }
-];
-
 export default function HomePage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8 text-foreground">
@@ -69,27 +46,6 @@ export default function HomePage() {
           <div className="flex items-center justify-center gap-2 text-primary font-semibold mb-4 text-lg">
             <Phone size={22} />
             <span>للتواصل: 01205342194</span>
-          </div>
-        </section>
-
-        <section className="my-12 text-center">
-          <h2 className="font-headline text-2xl sm:text-3xl font-bold text-primary mb-8">
-            دليلكِ الشامل لمراحل الرعاية الصحية
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {careStages.map((stage, index) => (
-              <Card key={index} className="bg-card shadow-lg hover:shadow-xl transition-shadow text-center rounded-xl">
-                <CardHeader className="items-center pt-6 pb-3">
-                  <stage.icon className="h-16 w-16 text-primary mb-3" />
-                  <CardTitle className="text-xl font-semibold text-primary">{stage.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="pb-6">
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {stage.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </section>
 
