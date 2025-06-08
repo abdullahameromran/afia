@@ -131,24 +131,7 @@ const lifeStageSectionsData = [
     dialogTitleTextClass: "text-sky-700",
     info: [
       {
-        title: 'أ. قبل الحمل',
-        Icon: CalendarCheck,
-        subsections: [
-          {
-            title: 'التخطيط للحمل',
-            details: [
-              'تناول حمض الفوليك (400 ميكروغرام يوميًا) قبل الحمل بـ 3 أشهر.',
-              'تجنب الكحول والتدخين.',
-            ],
-          },
-          {
-            title: 'الفحوصات',
-            details: ['تحاليل الغدة الدرقية، الهيموجلوبين، الأمراض المنقولة جنسيًا.'],
-          },
-        ],
-      },
-      {
-        title: 'ب. أثناء الحمل',
+        title: 'ب. العناية أثناء الحمل',
         Icon: Stethoscope, 
         subsections: [
            {
@@ -169,7 +152,7 @@ const lifeStageSectionsData = [
         ],
       },
        {
-        title: 'ج. الولادة',
+        title: 'ج. العناية أثناء الولادة',
         Icon: BedDouble,
         subsections: [
            {
@@ -186,7 +169,7 @@ const lifeStageSectionsData = [
         ],
       },
       {
-        title: 'د. ما بعد الولادة',
+        title: 'د. العناية بعد الولادة',
         Icon: HelpingHand,
         subsections: [
            {
@@ -421,10 +404,6 @@ export default function HomePage() {
                         <ListItem>سن الأمل: التركيز على منع هشاشة العظام وأمراض القلب.</ListItem>
                     </ul>
                 </div>
-                {/* Potentially add a button here if this card were to also become a dialog, but per current structure it's direct content */}
-                {/* <Button variant="outline" className="w-full mt-auto text-emerald-600 border-emerald-300 hover:bg-emerald-100">
-                    اقرئي المزيد (مثال)
-                </Button> */}
               </CardContent>
             </Card>
           </div>
