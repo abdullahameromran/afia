@@ -60,7 +60,7 @@ export function QnaForm() {
       const input: AnswerWomensHealthQuestionInput = {
         question: data.question,
         userName: data.username,
-        ...(lifeStageLabelToPass !== undefined && { age: lifeStageLabelToPass }) // Pass label as 'age'
+        ...(lifeStageLabelToPass !== undefined && { age: lifeStageLabelToPass })
       };
       const aiResponse: AnswerWomensHealthQuestionOutput = await answerWomensHealthQuestion(input);
       
@@ -162,8 +162,8 @@ export function QnaForm() {
             />
 
             {selectedStageInfo && (
-              <Card className="mt-4 bg-background border-primary/30 shadow-md text-right">
-                <CardHeader className="pb-2">
+              <Card className="mt-4 bg-background border-primary/30 shadow-md text-right" dir="rtl">
+                <CardHeader className="pb-2 flex flex-col items-end">
                   <CardTitle className="text-xl font-headline text-primary flex items-center gap-2 justify-end">
                      معلومات حول: {selectedStageInfo.label} <Info size={20}/>
                   </CardTitle>
@@ -224,7 +224,7 @@ export function QnaForm() {
             <Button type="submit" disabled={isLoading} className="w-full font-bold text-lg py-3 h-auto">
               {isLoading ? (
                 <>
-                  <Loader2 className="ml-2 h-5 w-5 animate-spin" /> {/* Adjusted margin for RTL */}
+                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
                   جاري المعالجة...
                 </>
               ) : (
@@ -235,8 +235,8 @@ export function QnaForm() {
         </Form>
 
         {error && (
-          <div className="mt-6 p-4 bg-destructive/10 text-destructive border-r-4 border-destructive rounded flex items-start gap-3 text-right">
-            <AlertTriangle className="h-5 w-5 flex-shrink-0 ml-2" /> {/* Adjusted margin for RTL */}
+          <div className="mt-6 p-4 bg-destructive/10 text-destructive border-r-4 border-destructive rounded flex items-start gap-3 text-right" dir="rtl">
+            <AlertTriangle className="h-5 w-5 flex-shrink-0 ml-2" />
             <div>
               <p className="font-semibold">خطأ في الاتصال</p>
               <p className="text-sm">{error}</p>
@@ -246,7 +246,7 @@ export function QnaForm() {
 
         {response && !error && (
           <div className="mt-8 transition-opacity duration-500 ease-in-out opacity-100">
-            <Card className="bg-background border-r-[6px] border-primary shadow-md text-right">
+            <Card className="bg-background border-r-[6px] border-primary shadow-md text-right" dir="rtl">
               <CardHeader>
                 <CardTitle className="font-headline text-primary text-2xl text-right">الإجابة:</CardTitle>
               </CardHeader>
@@ -262,3 +262,4 @@ export function QnaForm() {
     </Card>
   );
 }
+
