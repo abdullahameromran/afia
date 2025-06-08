@@ -16,7 +16,7 @@ import { createSupabaseServiceRoleClient } from '@/lib/supabaseClient';
 const AnswerWomensHealthQuestionInputSchema = z.object({
   question: z.string().describe('The question about women\'s health.'),
   userName: z.string().optional().describe('The name of the user asking the question.'),
-  age: z.string().optional().describe('The life stage label selected by the user (e.g., "مرحلة البلوغ (13–16 سنة)").') // Changed from number to string
+  age: z.string().optional().describe('The life stage label selected by the user (e.g., "مرحلة البلوغ (13–16 سنة)").')
 });
 
 export type AnswerWomensHealthQuestionInput = z.infer<typeof AnswerWomensHealthQuestionInputSchema>;
@@ -53,7 +53,7 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
           { 
             question: input.question,
             userName: input.userName || null, 
-            age: input.age || null, // Will now be the string label or null
+            age_label: input.age || null, // Changed 'age' to 'age_label'
             answer: flowResult.answer,
             // timestamp is handled by DB default NOW()
           }
@@ -118,3 +118,4 @@ const answerWomensHealthQuestionFlow = ai.defineFlow(
     };
   }
 );
+

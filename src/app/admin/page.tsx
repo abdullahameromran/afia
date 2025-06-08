@@ -16,7 +16,7 @@ interface QnaEntry {
   id: number;
   question: string;
   userName?: string;
-  age?: string; // Changed from number to string to store life stage label
+  age_label?: string; // Changed 'age' to 'age_label' to match database
   answer: string;
   timestamp: string; 
 }
@@ -51,7 +51,7 @@ export default function AdminPage() {
         try {
           const { data, error } = await supabase
             .from('qnaHistory')
-            .select('*')
+            .select('*') // This will fetch all columns, including 'age_label'
             .order('timestamp', { ascending: false });
 
           if (error) {
@@ -132,7 +132,7 @@ export default function AdminPage() {
               عرض سجل الأسئلة والأجوبة
             </CardTitle>
             <CardDescription className="text-right">
-              جميع الأسئلة التي طرحها المستخدمون والإجابات المقدمة من النظام، محفوظة في قاعدة البيانات.
+              جميع الأسئلة التي طرحها المستخدمون والإجابات المقدمة من النظام، محفوظة في خدمة تخزين البيانات.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -162,7 +162,7 @@ export default function AdminPage() {
                     <TableRow>
                       <TableHead className="w-[150px] text-right">الوقت</TableHead>
                       <TableHead className="w-[120px] text-right">المستخدم</TableHead>
-                      <TableHead className="w-[180px] text-right">المرحلة العمرية</TableHead> {/* Updated Header */}
+                      <TableHead className="w-[180px] text-right">المرحلة العمرية</TableHead>
                       <TableHead className="text-right">السؤال</TableHead>
                       <TableHead className="text-right">الإجابة</TableHead>
                     </TableRow>
@@ -172,7 +172,7 @@ export default function AdminPage() {
                       <TableRow key={entry.id}>
                         <TableCell className="text-right">{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
                         <TableCell className="text-right">{entry.userName || '-'}</TableCell>
-                        <TableCell className="text-right">{entry.age || '-'}</TableCell> {/* Displays life stage label */}
+                        <TableCell className="text-right">{entry.age_label || '-'}</TableCell> {/* Changed 'entry.age' to 'entry.age_label' */}
                         <TableCell className="whitespace-pre-wrap max-w-sm break-words text-right">{entry.question}</TableCell>
                         <TableCell className="whitespace-pre-wrap max-w-md break-words text-right">{entry.answer}</TableCell>
                       </TableRow>
