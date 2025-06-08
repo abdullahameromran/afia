@@ -14,9 +14,10 @@ import {z} from 'genkit';
 import { createSupabaseServiceRoleClient } from '@/lib/supabaseClient'; 
 
 const AnswerWomensHealthQuestionInputSchema = z.object({
-  question: z.string().describe('The question about women\'s health.'),
+  question: z.string().describe("The question about women's health."),
   userName: z.string().optional().describe('The name of the user asking the question.'),
-  age: z.string().optional().describe('The life stage label selected by the user (e.g., "مرحلة البلوغ (13–16 سنة)").')
+  numericAgeForAI: z.number().optional().describe('The representative numeric age for the life stage, for AI context.'),
+  textualAgeLabel: z.string().optional().describe('The textual description of the life stage (e.g., "مرحلة البلوغ (13–16 سنة)"), for AI context and database saving.')
 });
 
 export type AnswerWomensHealthQuestionInput = z.infer<typeof AnswerWomensHealthQuestionInputSchema>;
@@ -42,6 +43,11 @@ async (input) => {
 });
 
 export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuestionInput): Promise<AnswerWomensHealthQuestionOutput> {
+  if (!input.question) {
+    console.error("answerWomensHealthQuestion called with no question.");
+    return { answer: "حدث خطأ: لم يتم تقديم أي سؤال." };
+  }
+
   const flowResult = await answerWomensHealthQuestionFlow(input);
   const supabase = createSupabaseServiceRoleClient();
 
@@ -53,7 +59,7 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
           { 
             question: input.question,
             userName: input.userName || null, 
-            age_label: input.age || null, // Changed 'age' to 'age_label'
+            age_label: input.textualAgeLabel || null, // Save the textual label
             answer: flowResult.answer,
             // timestamp is handled by DB default NOW()
           }
@@ -69,6 +75,8 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
     }
   } else if (!supabase) {
     console.warn("Supabase client (service role) is not initialized. Skipping save of Q&A history. Please check Supabase configuration in .env.");
+  } else if (!flowResult?.answer) {
+    console.warn("AI flow did not return an answer. Skipping save of Q&A history.");
   }
   return flowResult;
 }
@@ -91,14 +99,17 @@ An example of a good disclaimer structure (ensure it's naturally integrated into
 If a question is completely unrelated to women's health, pregnancy, childbirth, family planning, or general healthcare, then you should politely decline in Arabic, explaining that your expertise is limited to these health topics.
 
 If a user's name is provided, address them personally in your Arabic response.
-If a life stage (age field) is provided (e.g., "مرحلة البلوغ (13–16 سنة)"), consider it to tailor the tone and detail of your Arabic response appropriately.
+Consider the user's age and life stage information to tailor the tone and detail of your Arabic response appropriately.
 
 User's Question: {{{question}}}
 {{#if userName}}
 User's name: {{{userName}}}
 {{/if}}
-{{#if age}}
-User's life stage: {{{age}}}
+{{#if numericAgeForAI}}
+User's approximate age: {{{numericAgeForAI}}} years old.
+{{/if}}
+{{#if textualAgeLabel}}
+User's life stage category: {{{textualAgeLabel}}}
 {{/if}}`,
 });
 
@@ -110,12 +121,16 @@ const answerWomensHealthQuestionFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await answerWomensHealthQuestionPrompt(input);
+    if (!output?.answer) {
+        // Log or handle cases where the AI doesn't return an answer as expected
+        console.warn("answerWomensHealthQuestionPrompt did not return an answer in output object.");
+        return { answer: "لم أتمكن من إنشاء إجابة. يرجى المحاولة مرة أخرى أو إعادة صياغة سؤالك." };
+    }
     const filteredAnswer = await filterUnwantedTextTool({
-      text: output!.answer,
+      text: output.answer,
     });
     return {
       answer: filteredAnswer,
     };
   }
 );
-

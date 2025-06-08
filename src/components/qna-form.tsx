@@ -2,21 +2,21 @@
 "use client";
 
 import { useState } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form'; // Corrected import
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/components/ui/label'; // Not directly used, but FormLabel depends on it
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, AlertTriangle, Info } from 'lucide-react';
+import { Loader2, AlertTriangle, Info, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { lifeStagesData, type LifeStage, type StageSection, type HealthTip, type Subsection } from '@/lib/lifeStagesData'; // Corrected import name
 import { answerWomensHealthQuestion, type AnswerWomensHealthQuestionInput, type AnswerWomensHealthQuestionOutput } from '@/ai/flows/answer-womens-health-questions';
-import { lifeStagesData, type LifeStage, type StageSection, type HealthTip, type Subsection } from '@/lib/lifeStagesData';
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "الرجاء إدخال اسمكِ" }),
@@ -53,16 +53,24 @@ export function QnaForm() {
     setError(null);
     setResponse(null);
 
-    const selectedStage = lifeStagesData.find(s => s.id === data.lifeStage);
-    const lifeStageLabelToPass = selectedStage ? selectedStage.label : undefined;
+    const { username, question, lifeStage: lifeStageId } = data;
+    // selectedStageInfo is derived from component state, updated by handleStageChange
+    const currentSelectedStage = selectedStageInfo;
 
+    const inputPayload: AnswerWomensHealthQuestionInput = {
+      question,
+      userName: username,
+    };
+
+    if (currentSelectedStage) {
+      inputPayload.textualAgeLabel = currentSelectedStage.label;
+      if (currentSelectedStage.averageAge !== undefined) {
+        inputPayload.numericAgeForAI = currentSelectedStage.averageAge;
+      }
+    }
+    
     try {
-      const input: AnswerWomensHealthQuestionInput = {
-        question: data.question,
-        userName: data.username,
-        ...(lifeStageLabelToPass !== undefined && { age: lifeStageLabelToPass })
-      };
-      const aiResponse: AnswerWomensHealthQuestionOutput = await answerWomensHealthQuestion(input);
+      const aiResponse: AnswerWomensHealthQuestionOutput = await answerWomensHealthQuestion(inputPayload);
       
       if (aiResponse && aiResponse.answer) {
         setResponse(aiResponse.answer); 
@@ -127,11 +135,11 @@ export function QnaForm() {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="username" className="block">اسمكِ</FormLabel>
+                  <FormLabel htmlFor="username" className="block text-right">اسمكِ</FormLabel>
                   <FormControl>
-                    <Input id="username" placeholder="اكتبي اسمكِ" {...field} className="shadow-inner" />
+                    <Input id="username" placeholder="اكتبي اسمكِ" {...field} className="shadow-inner text-right" />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-right" />
                 </FormItem>
               )}
             />
@@ -141,10 +149,10 @@ export function QnaForm() {
               name="lifeStage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block">المرحلة العمرية</FormLabel>
+                  <FormLabel className="block text-right">المرحلة العمرية</FormLabel>
                   <Select onValueChange={handleStageChange} defaultValue={field.value} dir="rtl">
                     <FormControl>
-                      <SelectTrigger className="shadow-inner">
+                      <SelectTrigger className="shadow-inner text-right">
                         <SelectValue placeholder="اختاري مرحلتكِ العمرية" />
                       </SelectTrigger>
                     </FormControl>
@@ -156,7 +164,7 @@ export function QnaForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-right" />
                 </FormItem>
               )}
             />
@@ -165,7 +173,7 @@ export function QnaForm() {
               <Card className="mt-4 bg-background border-primary/30 shadow-md" dir="rtl">
                 <CardHeader className="w-full pb-2 flex flex-col items-start">
                   <CardTitle className="w-full text-xl font-headline text-primary flex items-center gap-2 justify-start">
-                     <Info size={20}/> <span>معلومات حول: {selectedStageInfo.label}</span>
+                     <Info size={20}/> <span className="text-right">معلومات حول: {selectedStageInfo.label}</span>
                   </CardTitle>
                   <CardDescription className="w-full text-right">
                     نقدم لكِ بعض المعلومات العامة حول هذه المرحلة. يمكنكِ طرح أسئلة أكثر تحديدًا أدناه.
@@ -175,8 +183,9 @@ export function QnaForm() {
                   <Accordion type="single" collapsible className="w-full" dir="rtl">
                     {selectedStageInfo.info.map((section, index) => (
                       <AccordionItem value={`item-${index}`} key={section.title}>
-                        <AccordionTrigger className="font-semibold hover:no-underline text-primary/90 text-right">
-                          <span>{section.title}</span>
+                        <AccordionTrigger className="font-semibold hover:no-underline text-primary/90 text-right justify-between w-full">
+                          <span className="text-right flex-grow">{section.title}</span>
+                          {/* ChevronDown is part of AccordionTrigger by default */}
                           </AccordionTrigger>
                         <AccordionContent className="text-right space-y-2 pt-2 pr-2">
                           {section.description && <p className="text-sm text-muted-foreground text-right">{section.description}</p>}
@@ -188,8 +197,8 @@ export function QnaForm() {
                     ))}
                     {selectedStageInfo.generalSummaryPoints && selectedStageInfo.generalSummaryPoints.length > 0 && (
                        <AccordionItem value="general-summary">
-                         <AccordionTrigger className="font-semibold hover:no-underline text-primary/90 text-right">
-                           <span>نقاط رئيسية للتثقيف الصحي</span>
+                         <AccordionTrigger className="font-semibold hover:no-underline text-primary/90 text-right justify-between w-full">
+                           <span className="text-right flex-grow">نقاط رئيسية للتثقيف الصحي</span>
                            </AccordionTrigger>
                          <AccordionContent className="text-right space-y-1 pt-2 pr-2">
                            {renderPoints(selectedStageInfo.generalSummaryPoints)}
@@ -206,17 +215,17 @@ export function QnaForm() {
               name="question"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="question" className="block">سؤالكِ المحدد</FormLabel>
+                  <FormLabel htmlFor="question" className="block text-right">سؤالكِ المحدد</FormLabel>
                   <FormControl>
                     <Textarea
                       id="question"
                       placeholder="بعد الاطلاع على المعلومات، ما هو سؤالكِ المحدد؟"
                       rows={4}
                       {...field}
-                      className="shadow-inner min-h-[100px]"
+                      className="shadow-inner min-h-[100px] text-right"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-right" />
                 </FormItem>
               )}
             />

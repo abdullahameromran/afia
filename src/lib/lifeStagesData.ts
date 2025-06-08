@@ -23,7 +23,7 @@ export interface StageSection {
 export interface LifeStage {
   id: string;
   label: string;
-  averageAge: number;
+  averageAge: number; // Added back numeric age
   info: StageSection[];
   generalSummaryPoints?: string[]; // For the "نقاط رئيسية للتثقيف الصحي عبر المراحل" specific to this stage
 }
