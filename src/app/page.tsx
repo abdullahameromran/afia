@@ -149,7 +149,7 @@ const lifeStageSectionsData = [
       },
       {
         title: 'ب. أثناء الحمل',
-        Icon: Stethoscope, // Kept Stethoscope here as it's a sub-section icon
+        Icon: Stethoscope, 
         subsections: [
            {
             title: 'العناية حسب الثلث',
@@ -240,7 +240,7 @@ const lifeStageSectionsData = [
       },
       {
         title: 'العناية الصحية',
-        Icon: ShieldCheck, // Changed from Activity to be more specific
+        Icon: ShieldCheck, 
         tips: [
           {
             title: 'التغذية',
@@ -331,7 +331,7 @@ export default function HomePage() {
                   <CardHeader className={cn("py-4 px-4 md:px-6 md:py-5", stage.headerClasses)}>
                     <CardTitle className={cn("text-2xl font-headline flex items-center justify-between w-full", stage.titleTextClass)}>
                       <div className="flex items-center gap-3">
-                        <StageIcon size={32} /> {/* Increased size */}
+                        <StageIcon size={32} />
                         <span>{stage.title.replace(/\s*\(.*?\)\s*/g, '')}</span>
                       </div>
                       <DialogTrigger asChild>
@@ -347,7 +347,7 @@ export default function HomePage() {
                 <DialogContent className="sm:max-w-2xl max-h-[85vh] bg-card text-right flex flex-col" dir="rtl">
                   <DialogHeader className="border-b pb-3 mb-1 sticky top-0 bg-card z-10 pt-2">
                     <DialogTitle className={cn("font-headline text-2xl text-right flex items-center gap-2", stage.dialogTitleTextClass)}>
-                      <StageIcon size={32} /> {/* Increased size */}
+                      <StageIcon size={32} />
                       تفاصيل: {stage.title.substring(stage.title.indexOf(' ') + 1).replace(/\s*\(.*?\)\s*/g, '')}
                     </DialogTitle>
                     <DialogDescription className="text-right text-muted-foreground">
@@ -385,7 +385,7 @@ export default function HomePage() {
                       );
                     })}
                   </div>
-                  <DialogFooter className="border-t pt-3 mt-2 sticky bottom-0 bg-card z-10 pb-2">
+                  <DialogFooter className="border-t pt-3 pb-2 mt-auto bg-card">
                     <DialogClose asChild>
                       <Button type="button" variant="outline" className="w-full sm:w-auto">
                         إغلاق
@@ -400,7 +400,7 @@ export default function HomePage() {
           <Card className="bg-emerald-50 border-emerald-200 shadow-lg overflow-hidden">
             <CardHeader className="bg-emerald-100">
               <CardTitle className="text-2xl font-headline text-emerald-700 flex items-center gap-3">
-                <BookOpenCheck size={32} /> {/* Changed Icon and Increased size */}
+                <BookOpenCheck size={32} />
                 <span>نقاط رئيسية للتثقيف الصحي عبر المراحل</span>
               </CardTitle>
             </CardHeader>
@@ -538,3 +538,5 @@ export default function HomePage() {
     </main>
   );
 }
+
+    
