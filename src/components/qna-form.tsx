@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useForm, type SubmitHandler } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form'; // Corrected import
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -118,20 +118,20 @@ export function QnaForm() {
 
 
   return (
-    <Card className="w-full shadow-xl bg-card">
+    <Card className="w-full shadow-xl bg-card text-right" dir="rtl">
       <CardContent className="p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 text-right">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="username" className="block text-right">اسمكِ</FormLabel>
+                  <FormLabel htmlFor="username" className="block">اسمكِ</FormLabel>
                   <FormControl>
-                    <Input id="username" placeholder="اكتبي اسمكِ" {...field} className="text-right shadow-inner" />
+                    <Input id="username" placeholder="اكتبي اسمكِ" {...field} className="shadow-inner" />
                   </FormControl>
-                  <FormMessage className="text-right" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -141,31 +141,31 @@ export function QnaForm() {
               name="lifeStage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-right">المرحلة العمرية</FormLabel>
+                  <FormLabel className="block">المرحلة العمرية</FormLabel>
                   <Select onValueChange={handleStageChange} defaultValue={field.value} dir="rtl">
                     <FormControl>
-                      <SelectTrigger className="text-right shadow-inner">
+                      <SelectTrigger className="shadow-inner">
                         <SelectValue placeholder="اختاري مرحلتكِ العمرية" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {lifeStagesData.map(stage => (
-                        <SelectItem key={stage.id} value={stage.id} className="text-right justify-end">
+                        <SelectItem key={stage.id} value={stage.id} className="justify-end">
                           {stage.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage className="text-right" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
             {selectedStageInfo && (
-              <Card className="mt-4 bg-background border-primary/30 shadow-md text-right" dir="rtl">
+              <Card className="mt-4 bg-background border-primary/30 shadow-md" dir="rtl">
                 <CardHeader className="w-full pb-2 flex flex-col items-start">
                   <CardTitle className="w-full text-xl font-headline text-primary flex items-center gap-2 justify-start">
-                    <Info size={20}/> <span>معلومات حول: {selectedStageInfo.label}</span>
+                     <Info size={20}/> <span>معلومات حول: {selectedStageInfo.label}</span>
                   </CardTitle>
                   <CardDescription className="w-full text-right">
                     نقدم لكِ بعض المعلومات العامة حول هذه المرحلة. يمكنكِ طرح أسئلة أكثر تحديدًا أدناه.
@@ -206,17 +206,17 @@ export function QnaForm() {
               name="question"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="question" className="block text-right">سؤالكِ المحدد</FormLabel>
+                  <FormLabel htmlFor="question" className="block">سؤالكِ المحدد</FormLabel>
                   <FormControl>
                     <Textarea
                       id="question"
                       placeholder="بعد الاطلاع على المعلومات، ما هو سؤالكِ المحدد؟"
                       rows={4}
                       {...field}
-                      className="text-right shadow-inner min-h-[100px]"
+                      className="shadow-inner min-h-[100px]"
                     />
                   </FormControl>
-                  <FormMessage className="text-right" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -262,5 +262,3 @@ export function QnaForm() {
     </Card>
   );
 }
-
-    
