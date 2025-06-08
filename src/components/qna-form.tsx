@@ -1,26 +1,30 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label'; // Not directly used, but FormLabel depends on it
+// import { Label } from '@/components/ui/label'; // Not directly used, but FormLabel depends on it
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// Select components are no longer needed for age
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Loader2, AlertTriangle, Info, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { lifeStagesData, type LifeStage, type StageSection, type HealthTip, type Subsection } from '@/lib/lifeStagesData'; // Corrected import name
+import { lifeStagesData, type LifeStage, type StageSection, type HealthTip, type Subsection, getLifeStageFromAge } from '@/lib/lifeStagesData';
 import { answerWomensHealthQuestion, type AnswerWomensHealthQuestionInput, type AnswerWomensHealthQuestionOutput } from '@/ai/flows/answer-womens-health-questions';
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "الرجاء إدخال اسمكِ" }),
-  lifeStage: z.string({ required_error: "الرجاء اختيار مرحلة عمرية" }), // This will be the ID of the stage
+  lifeStage: z.coerce // Use coerce for inputs that might start as strings
+    .number({ invalid_type_error: "الرجاء إدخال العمر كأرقام." })
+    .min(10, { message: "العمر يجب أن يكون 10 سنوات على الأقل." })
+    .max(120, { message: "الرجاء إدخال عمر صحيح (حتى 120 سنة)." })
+    .positive({ message: "يجب أن يكون العمر رقمًا موجبًا."}),
   question: z.string().min(10, { message: "الرجاء إدخال سؤال واضح (10 أحرف على الأقل)" }),
 });
 
@@ -37,37 +41,38 @@ export function QnaForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: '',
-      lifeStage: undefined,
+      lifeStage: undefined, // Will be a number
       question: '',
     },
   });
 
-  const handleStageChange = (stageId: string) => {
-    const stage = lifeStagesData.find(s => s.id === stageId) || null;
-    setSelectedStageInfo(stage);
-    form.setValue('lifeStage', stageId, { shouldValidate: true });
-  };
+  const watchedAge = form.watch('lifeStage');
+
+  useEffect(() => {
+    if (watchedAge !== undefined && !isNaN(watchedAge)) {
+      const stage = getLifeStageFromAge(Number(watchedAge));
+      setSelectedStageInfo(stage);
+    } else {
+      setSelectedStageInfo(null);
+    }
+  }, [watchedAge]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
     setError(null);
     setResponse(null);
 
-    const { username, question, lifeStage: lifeStageId } = data;
-    // selectedStageInfo is derived from component state, updated by handleStageChange
-    const currentSelectedStage = selectedStageInfo;
+    const { username, question, lifeStage: ageValue } = data;
+    
+    const matchedStage = getLifeStageFromAge(Number(ageValue));
+    const textualAgeLabel = matchedStage ? matchedStage.label : "مرحلة عمرية غير محددة";
 
     const inputPayload: AnswerWomensHealthQuestionInput = {
       question,
       userName: username,
+      numericAgeForAI: Number(ageValue), // Send the direct numeric age
+      textualAgeLabel: textualAgeLabel, // Send the mapped textual label
     };
-
-    if (currentSelectedStage) {
-      inputPayload.textualAgeLabel = currentSelectedStage.label;
-      if (currentSelectedStage.averageAge !== undefined) {
-        inputPayload.numericAgeForAI = currentSelectedStage.averageAge;
-      }
-    }
     
     try {
       const aiResponse: AnswerWomensHealthQuestionOutput = await answerWomensHealthQuestion(inputPayload);
@@ -146,24 +151,20 @@ export function QnaForm() {
 
             <FormField
               control={form.control}
-              name="lifeStage"
+              name="lifeStage" // This field now represents numeric age
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="block text-right">المرحلة العمرية</FormLabel>
-                  <Select onValueChange={handleStageChange} defaultValue={field.value} dir="rtl">
-                    <FormControl>
-                      <SelectTrigger className="shadow-inner text-right">
-                        <SelectValue placeholder="اختاري مرحلتكِ العمرية" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {lifeStagesData.map(stage => (
-                        <SelectItem key={stage.id} value={stage.id} className="justify-end">
-                          {stage.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel htmlFor="lifeStage" className="block text-right">عمركِ (بالسنوات)</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="lifeStage"
+                      type="number"
+                      placeholder="مثال: 25"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                      className="shadow-inner text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </FormControl>
                   <FormMessage className="text-right" />
                 </FormItem>
               )}
@@ -176,7 +177,7 @@ export function QnaForm() {
                      <Info size={20}/> <span className="text-right">معلومات حول: {selectedStageInfo.label}</span>
                   </CardTitle>
                   <CardDescription className="w-full text-right">
-                    نقدم لكِ بعض المعلومات العامة حول هذه المرحلة. يمكنكِ طرح أسئلة أكثر تحديدًا أدناه.
+                    هذه معلومات عامة تناسب العمر الذي أدخلتيه. يمكنكِ طرح أسئلة أكثر تحديدًا أدناه.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
