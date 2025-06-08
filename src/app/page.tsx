@@ -3,12 +3,12 @@ import { ClientQnaFormWrapper } from '@/components/client-qna-form-wrapper';
 import { Baby, Hospital, Users, Flower2, Heart, Phone, Sparkles, CalendarDays, CalendarHeart, Bell, School, Users2, Activity, Leaf, Utensils, Bike, Droplets, HeartPulse, BookOpenCheck, ClipboardCheck, BedDouble, HelpingHand, Milk, Sunrise, Replace, ShieldAlert, Pill, ListChecks, Route, Milestone, Brain, CheckCircle, ShieldCheck, GitMerge, Zap, Stethoscope, Flame, Apple, GraduationCap, Dumbbell, WashingMachine, CalendarPlus, HeartHandshake, ThermometerSun, Waves, Info, Newspaper, AlignJustify, BookOpen, CalendarCheck } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription as ShadcnCardDescription } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { PeriodTracker } from '@/components/period-tracker';
 import { OvulationTracker } from '@/components/ovulation-tracker';
 import { RemindersDisplay } from '@/components/reminders-display';
 import { Button } from '@/components/ui/button';
-import type { HealthTip, Subsection, StageSection } from '@/lib/lifeStagesData'; // Import types if needed for helper functions
+import type { HealthTip, Subsection, StageSection } from '@/lib/lifeStagesData'; 
 import { cn } from '@/lib/utils';
 
 // Helper component for list items with optional sub-points
@@ -538,3 +538,5 @@ export default function HomePage() {
     </main>
   );
 }
+
+    
