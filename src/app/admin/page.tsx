@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, LogOut, ListChecks, AlertTriangle, Heart } from 'lucide-react';
+import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2 } from 'lucide-react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient'; 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -16,11 +16,16 @@ interface QnaEntry {
   id: number;
   question: string;
   userName?: string;
-  age_label?: string; // Changed 'age' to 'age_label' to match database
+  age_label?: string;
   answer: string;
   timestamp: string; 
 }
 
+interface AnalyticsData {
+  totalQuestions: number;
+  questionsByAgeGroup: Record<string, number>;
+  uniqueUsers: number;
+}
 
 export default function AdminPage() {
   const { isAuthenticated, logout, isLoading: authIsLoading } = useAuth();
@@ -28,6 +33,7 @@ export default function AdminPage() {
   const [qnaHistory, setQnaHistory] = useState<QnaEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
 
   useEffect(() => {
     if (!authIsLoading && !isAuthenticated) {
@@ -37,9 +43,10 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (isAuthenticated && !authIsLoading) {
-      const fetchHistory = async () => {
+      const fetchHistoryAndAnalyze = async () => {
         setHistoryLoading(true);
         setHistoryError(null);
+        setAnalytics(null); 
         
         if (!supabase) {
             console.warn("Supabase client is not initialized. Cannot fetch Q&A history. Please check Supabase configuration in .env.");
@@ -51,13 +58,37 @@ export default function AdminPage() {
         try {
           const { data, error } = await supabase
             .from('qnaHistory')
-            .select('*') // This will fetch all columns, including 'age_label'
+            .select('*')
             .order('timestamp', { ascending: false });
 
           if (error) {
             throw error;
           }
-          setQnaHistory(data as QnaEntry[]);
+          
+          if (data) {
+            setQnaHistory(data as QnaEntry[]);
+
+            // Calculate analytics
+            const totalQuestions = data.length;
+            
+            const ageGroupCounts = data.reduce((acc, entry) => {
+              const ageLabel = entry.age_label || 'غير محدد';
+              acc[ageLabel] = (acc[ageLabel] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+
+            const uniqueUserNames = new Set(data.map(entry => entry.userName).filter(Boolean as (value: string | null | undefined) => value is string));
+            const uniqueUsers = uniqueUserNames.size;
+
+            setAnalytics({
+              totalQuestions,
+              questionsByAgeGroup: ageGroupCounts,
+              uniqueUsers,
+            });
+
+          } else {
+             setQnaHistory([]);
+          }
         } catch (err: any) {
           console.error("Error fetching Q&A history from Supabase:", err);
           setHistoryError(`فشل في تحميل سجل الأسئلة والأجوبة: ${err.message || 'خطأ غير معروف'}`);
@@ -65,10 +96,11 @@ export default function AdminPage() {
           setHistoryLoading(false);
         }
       };
-      fetchHistory();
+      fetchHistoryAndAnalyze();
     } else if (!authIsLoading && !isAuthenticated) {
       setQnaHistory([]);
       setHistoryLoading(false);
+      setAnalytics(null);
     }
   }, [isAuthenticated, authIsLoading]);
 
@@ -128,6 +160,60 @@ export default function AdminPage() {
         <Card className="shadow-lg">
           <CardHeader className="text-right">
             <CardTitle className="text-2xl text-primary flex items-center justify-end gap-2">
+              <BarChart2 />
+              إحصائيات الاستخدام
+            </CardTitle>
+            <CardDescription className="text-right">
+              نظرة عامة على تفاعلات المستخدمين مع قسم الأسئلة والأجوبة.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {historyLoading && (
+              <div className="flex justify-center items-center py-6">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="mr-3">جاري تحميل الإحصائيات...</p>
+              </div>
+            )}
+            {historyError && !historyLoading && (
+              <p className="text-destructive text-center py-6">
+                  فشل في تحميل بيانات الإحصائيات بسبب خطأ في جلب السجل.
+              </p>
+            )}
+            {!historyLoading && !historyError && analytics && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-lg">الملخص العام:</h3>
+                  <p>إجمالي عدد الأسئلة: {analytics.totalQuestions}</p>
+                  <p>عدد المستخدمين (حسب الأسماء الفريدة): {analytics.uniqueUsers}</p>
+                </div>
+                {Object.keys(analytics.questionsByAgeGroup).length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-lg mt-4">الأسئلة حسب الفئة العمرية:</h3>
+                    <ul className="list-disc list-inside pr-5 space-y-1">
+                      {Object.entries(analytics.questionsByAgeGroup).sort(([, countA], [, countB]) => countB - countA).map(([ageGroup, count]) => (
+                        <li key={ageGroup}>{ageGroup}: {count} سؤال</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                 {analytics.totalQuestions === 0 && (
+                    <p className="text-muted-foreground text-center py-6">
+                        لا توجد أسئلة مسجلة لعرض الإحصائيات.
+                    </p>
+                 )}
+              </div>
+            )}
+            {!historyLoading && !historyError && !analytics && qnaHistory.length === 0 && (
+              <p className="text-muted-foreground text-center py-6">
+                لا توجد بيانات كافية لعرض الإحصائيات.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardHeader className="text-right">
+            <CardTitle className="text-2xl text-primary flex items-center justify-end gap-2">
               <ListChecks />
               عرض سجل الأسئلة والأجوبة
             </CardTitle>
@@ -172,7 +258,7 @@ export default function AdminPage() {
                       <TableRow key={entry.id}>
                         <TableCell className="text-right">{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
                         <TableCell className="text-right">{entry.userName || '-'}</TableCell>
-                        <TableCell className="text-right">{entry.age_label || '-'}</TableCell> {/* Changed 'entry.age' to 'entry.age_label' */}
+                        <TableCell className="text-right">{entry.age_label || '-'}</TableCell>
                         <TableCell className="whitespace-pre-wrap max-w-sm break-words text-right">{entry.question}</TableCell>
                         <TableCell className="whitespace-pre-wrap max-w-md break-words text-right">{entry.answer}</TableCell>
                       </TableRow>
@@ -192,3 +278,6 @@ export default function AdminPage() {
     </div>
   );
 }
+
+
+    
