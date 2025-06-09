@@ -87,7 +87,7 @@ export default function HomePage() {
       id: 'duringPregnancyCare',
       type: 'dialog' as const,
       title: 'العناية أثناء الحمل',
-      Icon: Stethoscope,
+      Icon: Stethoscope, // Changed from Baby
       cardClasses: "bg-sky-50 border-sky-200",
       headerClasses: "bg-sky-100",
       titleTextClass: "text-sky-700",
@@ -101,7 +101,7 @@ export default function HomePage() {
       id: 'childbirthCare',
       type: 'dialog' as const,
       title: 'العناية أثناء الولادة',
-      Icon: BedDouble,
+      Icon: BedDouble, // Keep BedDouble
       cardClasses: "bg-sky-50 border-sky-200",
       headerClasses: "bg-sky-100",
       titleTextClass: "text-sky-700",
@@ -116,7 +116,7 @@ export default function HomePage() {
       id: 'postnatalCare',
       type: 'dialog' as const,
       title: 'العناية بعد الولادة',
-      Icon: HelpingHand,
+      Icon: HelpingHand, // Keep HelpingHand
       cardClasses: "bg-sky-50 border-sky-200",
       headerClasses: "bg-sky-100",
       titleTextClass: "text-sky-700",
@@ -213,15 +213,15 @@ export default function HomePage() {
               if (card.type === 'infoCard') {
                 return (
                     <Card key={card.id} className={cn("shadow-lg overflow-hidden h-full flex flex-col", card.cardClasses)}>
-                        <CardHeader className={cn("py-4 px-4 md:px-6 md:py-5", card.headerClasses)}>
-                            <CardTitle className={cn("text-xl font-headline flex items-center gap-3", card.titleTextClass)}>
-                                <CardIcon size={32} />
+                        <CardHeader className={cn("py-4 px-4 md:px-6 md:py-5 flex-col items-center text-center", card.headerClasses)}>
+                            <CardIcon size={32} className={cn("mb-2", card.titleTextClass)} />
+                            <CardTitle className={cn("text-xl font-headline", card.titleTextClass)}>
                                 <span>{card.title}</span>
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-4 md:p-6 text-emerald-800/90 flex-grow flex flex-col justify-between">
                             <div>
-                                <ShadcnCardDescription className="text-sm text-muted-foreground/90 mb-4 leading-relaxed">
+                                <ShadcnCardDescription className="text-sm text-muted-foreground/90 mb-4 leading-relaxed text-center">
                                     {card.descriptionText}
                                 </ShadcnCardDescription>
                                 <ul className="space-y-2 list-none">
@@ -237,16 +237,14 @@ export default function HomePage() {
               return (
                 <Dialog key={card.id}>
                   <Card className={cn("shadow-lg overflow-hidden h-full flex flex-col", card.cardClasses)}>
-                    <CardHeader className={cn("py-4 px-4 md:px-6 md:py-5", card.headerClasses)}>
-                      <CardTitle className={cn("text-xl font-headline flex items-center justify-between w-full", card.titleTextClass)}>
-                        <div className="flex items-center gap-2">
-                          <CardIcon size={32} />
+                    <CardHeader className={cn("py-4 px-4 md:px-6 md:py-5 flex-col items-center text-center", card.headerClasses)}>
+                       <CardIcon size={32} className={cn("mb-2", card.titleTextClass)} />
+                      <CardTitle className={cn("text-xl font-headline", card.titleTextClass)}>
                           <span>{card.title}</span>
-                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 md:p-6 flex-grow flex flex-col justify-between">
-                        <ShadcnCardDescription className="text-sm text-muted-foreground/90 mb-4 leading-relaxed">
+                        <ShadcnCardDescription className="text-sm text-muted-foreground/90 mb-4 leading-relaxed text-center">
                             {card.shortDescriptionOnCard}
                         </ShadcnCardDescription>
                         <DialogTrigger asChild>
@@ -271,7 +269,7 @@ export default function HomePage() {
 
                     <div className="py-2 space-y-6 overflow-y-auto flex-grow pr-1">
                       {card.dialogInfo?.map((section, index) => {
-                        const SectionIcon = section.Icon; // Icon from lifeStagesData StageSection
+                        const SectionIcon = section.Icon;
                         return (
                           <div key={index} className="mb-4 p-3 rounded-lg border bg-background/50 shadow-sm">
                             <h3 className={cn("text-xl font-semibold mb-3 flex items-center gap-2", card.dialogTitleTextClass)}>
@@ -282,7 +280,7 @@ export default function HomePage() {
                             {section.subsections && renderSubsections(section.subsections, card.dialogTitleTextClass || "text-primary")}
                             {section.points && renderPoints(section.points)}
                             {section.tips && section.tips.map((tipCategory, tipIdx) => {
-                              const TipIcon = tipCategory.Icon; // Icon from HealthTip category
+                              const TipIcon = tipCategory.Icon;
                               return (
                                   <div key={tipIdx} className="mt-2">
                                     <h4 className={cn("font-semibold flex items-center gap-1 mb-1", card.dialogTitleTextClass || "text-primary")}>
@@ -437,4 +435,3 @@ export default function HomePage() {
     </main>
   );
 }
-
