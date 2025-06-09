@@ -246,6 +246,7 @@ export default function AdminPage() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
+                      <TableHead className="w-[50px] text-right">م</TableHead>
                       <TableHead className="w-[150px] text-right">الوقت</TableHead>
                       <TableHead className="w-[120px] text-right">المستخدم</TableHead>
                       <TableHead className="w-[180px] text-right">المرحلة العمرية</TableHead>
@@ -254,8 +255,9 @@ export default function AdminPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {qnaHistory.map((entry) => (
+                    {qnaHistory.map((entry, index) => (
                       <TableRow key={entry.id}>
+                        <TableCell className="text-right">{index + 1}</TableCell>
                         <TableCell className="text-right">{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
                         <TableCell className="text-right">{entry.userName || '-'}</TableCell>
                         <TableCell className="text-right">{entry.age_label || '-'}</TableCell>
@@ -279,5 +281,7 @@ export default function AdminPage() {
   );
 }
 
+
+    
 
     
