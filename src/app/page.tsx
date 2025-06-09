@@ -1,6 +1,6 @@
 
 import {
-  Baby, Hospital, Users, Flower2, Heart, Phone, Sparkles, CalendarDays, CalendarHeart, Bell, School, Users2, Activity, Leaf, Utensils, Bike, Droplets, HeartPulse, BookOpenCheck, ClipboardCheck, BedDouble, HelpingHand, Milk, Sunrise, Replace, ShieldAlert, Pill, ListChecks, Route, Milestone, Brain, CheckCircle, ShieldCheck, GitMerge, Zap, Stethoscope, Flame, Apple, GraduationCap, Dumbbell, WashingMachine, CalendarPlus, HeartHandshake, ThermometerSun, Waves, Info, Newspaper, AlignJustify, BookOpen, CalendarCheck,
+  Baby, Hospital, Users, Flower2, Heart, Phone, Sparkles, CalendarDays, CalendarHeart, Bell, Users2, Activity, Leaf, Utensils, Bike, Droplets, HeartPulse, BookOpenCheck, ClipboardCheck, BedDouble, HelpingHand, Milk, Sunrise, Replace, ShieldAlert, Pill, ListChecks, Route, Milestone, Brain, CheckCircle, ShieldCheck, GitMerge, Zap, Stethoscope, Flame, Apple, GraduationCap, Dumbbell, WashingMachine, CalendarPlus, HeartHandshake, ThermometerSun, Waves, Info, Newspaper, AlignJustify, BookOpen, CalendarCheck,
 } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription as ShadcnCardDescription } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import type { HealthTip, Subsection, StageSection } from '@/lib/lifeStagesData';
 import { lifeStagesData as originalLifeStageSectionsData } from '@/lib/lifeStagesData';
 import { cn } from '@/lib/utils';
 import { ClientQnaFormWrapper } from '@/components/client-qna-form-wrapper';
+import { QuizSection } from '@/components/quiz-section'; // Import the new QuizSection
 
 // Helper component for list items with optional sub-points
 const ListItem = ({ children, subPoints }: { children: React.ReactNode; subPoints?: string[] }) => (
@@ -31,19 +32,6 @@ const ListItem = ({ children, subPoints }: { children: React.ReactNode; subPoint
   </li>
 );
 
-// Helper functions to render details inside Dialog
-const renderHealthTips = (tips: HealthTip[], baseColorClass: string) => (
-  <ul className="space-y-3 list-inside text-right pr-4">
-    {tips.map(tip => (
-      <li key={tip.title}>
-        <strong className={cn("font-semibold", baseColorClass)}>{tip.title}:</strong>
-        <ul className="mr-4 mt-1 space-y-1 list-disc list-inside text-right">
-          {tip.points.map((point, i) => <li key={i} className="text-sm text-foreground/90">{point}</li>)}
-        </ul>
-      </li>
-    ))}
-  </ul>
-);
 
 const renderSubsections = (subsections: Subsection[], baseColorClass: string) => (
    <ul className="space-y-3 list-inside text-right pr-4">
@@ -87,7 +75,7 @@ export default function HomePage() {
       id: 'duringPregnancyCare',
       type: 'dialog' as const,
       title: 'العناية أثناء الحمل',
-      Icon: Stethoscope, // Changed from Baby
+      Icon: Stethoscope,
       cardClasses: "bg-sky-50 border-sky-200",
       headerClasses: "bg-sky-100",
       titleTextClass: "text-sky-700",
@@ -101,12 +89,12 @@ export default function HomePage() {
       id: 'childbirthCare',
       type: 'dialog' as const,
       title: 'العناية أثناء الولادة',
-      Icon: BedDouble, // Keep BedDouble
-      cardClasses: "bg-sky-50 border-sky-200",
-      headerClasses: "bg-sky-100",
-      titleTextClass: "text-sky-700",
-      buttonClasses: "text-sky-600 border-sky-300 hover:bg-sky-100",
-      dialogTitleTextClass: "text-sky-700",
+      Icon: BedDouble,
+      cardClasses: "bg-teal-50 border-teal-200", // Changed color for variety
+      headerClasses: "bg-teal-100",
+      titleTextClass: "text-teal-700",
+      buttonClasses: "text-teal-600 border-teal-300 hover:bg-teal-100",
+      dialogTitleTextClass: "text-teal-700",
       shortDescriptionOnCard: "استعدادات ومعلومات هامة لمرحلة الولادة.",
       dialogDescriptionText: "معلومات حول علامات الولادة وخياراتها المتاحة.",
       dialogInfo: originalLifeStageSectionsData?.[1]?.info?.[2] ? [originalLifeStageSectionsData[1].info[2]] : [],
@@ -116,12 +104,12 @@ export default function HomePage() {
       id: 'postnatalCare',
       type: 'dialog' as const,
       title: 'العناية بعد الولادة',
-      Icon: HelpingHand, // Keep HelpingHand
-      cardClasses: "bg-sky-50 border-sky-200",
-      headerClasses: "bg-sky-100",
-      titleTextClass: "text-sky-700",
-      buttonClasses: "text-sky-600 border-sky-300 hover:bg-sky-100",
-      dialogTitleTextClass: "text-sky-700",
+      Icon: HelpingHand,
+      cardClasses: "bg-amber-50 border-amber-200", // Changed color
+      headerClasses: "bg-amber-100",
+      titleTextClass: "text-amber-700",
+      buttonClasses: "text-amber-600 border-amber-300 hover:bg-amber-100",
+      dialogTitleTextClass: "text-amber-700",
       shortDescriptionOnCard: "إرشادات للتعافي ورعاية المولود الجديد.",
       dialogDescriptionText: "إرشادات هامة للعناية بنفسكِ وبمولودكِ في فترة النفاس.",
       dialogInfo: originalLifeStageSectionsData?.[1]?.info?.[3] ? [originalLifeStageSectionsData[1].info[3]] : [],
@@ -149,11 +137,12 @@ export default function HomePage() {
       headerClasses: "bg-emerald-100",
       titleTextClass: "text-emerald-700",
       descriptionText: "ملخص لأهم الإرشادات الصحية العامة التي يجب مراعاتها في مختلف مراحل حياة المرأة.",
-      contentPoints: [
-          'البلوغ: تعليم الفتيات عن الدورة الشهرية والنظافة.',
-          'الإنجاب: التشديد على الرعاية السابقة للحمل والفحوصات الدورية.',
-          'سن الأمل: التركيز على منع هشاشة العظام وأمراض القلب.',
-      ]
+      contentPoints: originalLifeStageSectionsData.reduce((acc, stage) => {
+        if (stage.generalSummaryPoints) {
+          acc.push(...stage.generalSummaryPoints);
+        }
+        return acc;
+      }, [] as string[]),
     }
   ];
 
@@ -269,7 +258,7 @@ export default function HomePage() {
 
                     <div className="py-2 space-y-6 overflow-y-auto flex-grow pr-1">
                       {card.dialogInfo?.map((section, index) => {
-                        const SectionIcon = section.Icon;
+                        const SectionIcon = section.Icon; // Keep Icon if it exists for subsections in data
                         return (
                           <div key={index} className="mb-4 p-3 rounded-lg border bg-background/50 shadow-sm">
                             <h3 className={cn("text-xl font-semibold mb-3 flex items-center gap-2", card.dialogTitleTextClass)}>
@@ -280,11 +269,11 @@ export default function HomePage() {
                             {section.subsections && renderSubsections(section.subsections, card.dialogTitleTextClass || "text-primary")}
                             {section.points && renderPoints(section.points)}
                             {section.tips && section.tips.map((tipCategory, tipIdx) => {
-                              const TipIcon = tipCategory.Icon;
+                              // const TipIcon = tipCategory.Icon; // Assuming tips might have icons
                               return (
                                   <div key={tipIdx} className="mt-2">
                                     <h4 className={cn("font-semibold flex items-center gap-1 mb-1", card.dialogTitleTextClass || "text-primary")}>
-                                      {TipIcon && <TipIcon size={18} />}
+                                      {/* {TipIcon && <TipIcon size={18} />} */}
                                       {tipCategory.title}:
                                     </h4>
                                     <ul className="space-y-1 pr-4 list-none">
@@ -312,6 +301,10 @@ export default function HomePage() {
         </section>
 
         <ClientQnaFormWrapper />
+
+        <section className="mt-12 mb-8">
+          <QuizSection />
+        </section>
 
         <section className="mt-12 mb-8 text-center">
           <h2 className="font-headline text-2xl sm:text-3xl font-bold text-primary mb-6">
@@ -435,3 +428,5 @@ export default function HomePage() {
     </main>
   );
 }
+
+    
