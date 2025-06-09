@@ -1,6 +1,7 @@
 
 import {
-  Baby, Hospital, Users, Flower2, Heart, Phone, Sparkles, CalendarDays, CalendarHeart, Bell, Users2, Activity, Leaf, Utensils, Bike, Droplets, HeartPulse, BookOpenCheck, ClipboardCheck, BedDouble, HelpingHand, Milk, Sunrise, Replace, ShieldAlert, Pill, ListChecks, Route, Milestone, Brain, CheckCircle, ShieldCheck, GitMerge, Zap, Stethoscope, Flame, Apple, GraduationCap, Dumbbell, WashingMachine, CalendarPlus, HeartHandshake, ThermometerSun, Waves, Info, Newspaper, AlignJustify, BookOpen, CalendarCheck,
+  Baby, Stethoscope, BedDouble, HelpingHand, HeartPulse, BookOpenCheck, Activity,
+  Flower2, Heart, Phone, Sparkles, CalendarDays, CalendarHeart, Bell, Users2, Leaf, Utensils, Bike, Droplets, BookOpen, ClipboardCheck, Milk, Sunrise, Replace, ShieldAlert, Pill, ListChecks, Route, Milestone, Brain, CheckCircle, ShieldCheck, GitMerge, Zap, Flame, Apple, GraduationCap, Dumbbell, WashingMachine, CalendarPlus, HeartHandshake, ThermometerSun, Waves, Info, Newspaper, AlignJustify, CalendarCheck,
 } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription as ShadcnCardDescription } from '@/components/ui/card';
@@ -15,7 +16,7 @@ import type { HealthTip, Subsection, StageSection } from '@/lib/lifeStagesData';
 import { lifeStagesData as originalLifeStageSectionsData } from '@/lib/lifeStagesData';
 import { cn } from '@/lib/utils';
 import { ClientQnaFormWrapper } from '@/components/client-qna-form-wrapper';
-import { QuizSection } from '@/components/quiz-section'; // Import the new QuizSection
+
 
 // Helper component for list items with optional sub-points
 const ListItem = ({ children, subPoints }: { children: React.ReactNode; subPoints?: string[] }) => (
@@ -56,7 +57,6 @@ const renderPoints = (points: string[]) => (
 export default function HomePage() {
   // Prepare data for the 3x2 grid
   const displayCardsData = [
-    // Row 1
     {
       id: originalLifeStageSectionsData?.[0]?.id || 'puberty',
       type: 'dialog' as const,
@@ -83,36 +83,35 @@ export default function HomePage() {
       dialogTitleTextClass: "text-sky-700",
       shortDescriptionOnCard: "معلومات وتوصيات لمتابعة الحمل بشكل صحي.",
       dialogDescriptionText: "نصائح وإرشادات للعناية بصحتك خلال فترة الحمل.",
-      dialogInfo: originalLifeStageSectionsData?.[1]?.info?.[1] ? [originalLifeStageSectionsData[1].info[1]] : [],
+      dialogInfo: originalLifeStageSectionsData?.[1]?.info?.[0] ? [originalLifeStageSectionsData[1].info[0]] : [],
     },
     {
       id: 'childbirthCare',
       type: 'dialog' as const,
       title: 'العناية أثناء الولادة',
       Icon: BedDouble,
-      cardClasses: "bg-teal-50 border-teal-200", // Changed color for variety
+      cardClasses: "bg-teal-50 border-teal-200",
       headerClasses: "bg-teal-100",
       titleTextClass: "text-teal-700",
       buttonClasses: "text-teal-600 border-teal-300 hover:bg-teal-100",
       dialogTitleTextClass: "text-teal-700",
       shortDescriptionOnCard: "استعدادات ومعلومات هامة لمرحلة الولادة.",
       dialogDescriptionText: "معلومات حول علامات الولادة وخياراتها المتاحة.",
-      dialogInfo: originalLifeStageSectionsData?.[1]?.info?.[2] ? [originalLifeStageSectionsData[1].info[2]] : [],
+      dialogInfo: originalLifeStageSectionsData?.[1]?.info?.[1] ? [originalLifeStageSectionsData[1].info[1]] : [],
     },
-    // Row 2
     {
       id: 'postnatalCare',
       type: 'dialog' as const,
       title: 'العناية بعد الولادة',
       Icon: HelpingHand,
-      cardClasses: "bg-amber-50 border-amber-200", // Changed color
+      cardClasses: "bg-amber-50 border-amber-200",
       headerClasses: "bg-amber-100",
       titleTextClass: "text-amber-700",
       buttonClasses: "text-amber-600 border-amber-300 hover:bg-amber-100",
       dialogTitleTextClass: "text-amber-700",
       shortDescriptionOnCard: "إرشادات للتعافي ورعاية المولود الجديد.",
       dialogDescriptionText: "إرشادات هامة للعناية بنفسكِ وبمولودكِ في فترة النفاس.",
-      dialogInfo: originalLifeStageSectionsData?.[1]?.info?.[3] ? [originalLifeStageSectionsData[1].info[3]] : [],
+      dialogInfo: originalLifeStageSectionsData?.[1]?.info?.[2] ? [originalLifeStageSectionsData[1].info[2]] : [],
     },
     {
       id: originalLifeStageSectionsData?.[2]?.id || 'menopause',
@@ -187,7 +186,7 @@ export default function HomePage() {
         </section>
 
         <section className="my-12" dir="rtl">
-          <header className="text-center mb-10">
+           <header className="text-center mb-10">
             <h2 className="font-headline text-3xl sm:text-4xl font-bold text-primary">
               رحلة صحة المرأة من المراهقة إلى سن الأمل
             </h2>
@@ -301,10 +300,6 @@ export default function HomePage() {
         </section>
 
         <ClientQnaFormWrapper />
-
-        <section className="mt-12 mb-8">
-          <QuizSection />
-        </section>
 
         <section className="mt-12 mb-8 text-center">
           <h2 className="font-headline text-2xl sm:text-3xl font-bold text-primary mb-6">
@@ -428,5 +423,3 @@ export default function HomePage() {
     </main>
   );
 }
-
-    
