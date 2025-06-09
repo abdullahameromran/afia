@@ -246,23 +246,23 @@ export default function AdminPage() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
-                      <TableHead className="w-[50px] text-right">م</TableHead>
                       <TableHead className="w-[150px] text-right">الوقت</TableHead>
                       <TableHead className="w-[120px] text-right">المستخدم</TableHead>
                       <TableHead className="w-[180px] text-right">المرحلة العمرية</TableHead>
                       <TableHead className="text-right">السؤال</TableHead>
                       <TableHead className="text-right">الإجابة</TableHead>
+                      <TableHead className="w-[50px] text-right">م</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {qnaHistory.map((entry, index) => (
                       <TableRow key={entry.id}>
-                        <TableCell className="text-right">{index + 1}</TableCell>
                         <TableCell className="text-right">{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
                         <TableCell className="text-right">{entry.userName || '-'}</TableCell>
                         <TableCell className="text-right">{entry.age_label || '-'}</TableCell>
                         <TableCell className="whitespace-pre-wrap max-w-sm break-words text-right">{entry.question}</TableCell>
                         <TableCell className="whitespace-pre-wrap max-w-md break-words text-right">{entry.answer}</TableCell>
+                        <TableCell className="text-right">{index + 1}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -280,8 +280,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-
-    
-
-    
