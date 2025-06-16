@@ -262,7 +262,7 @@ export default function AdminPage() {
                           <YAxis
                             dataKey="name"
                             type="category"
-                            width={110} // Adjusted for potentially longer labels in Arabic
+                            width={160} 
                             interval={0}
                             tick={{ fontSize: 10, fill: 'hsl(var(--foreground))' }}
                           />
@@ -349,7 +349,7 @@ export default function AdminPage() {
                         <TableCell className="whitespace-pre-wrap max-w-sm break-words text-right text-xs">{entry.answer}</TableCell>
                         <TableCell className="text-right text-xs">{renderStars(entry.rating)}</TableCell>
                         <TableCell className="whitespace-pre-wrap max-w-xs break-words text-right text-xs">{entry.review_text || '-'}</TableCell>
-                        <TableCell className="text-right text-xs">{index + 1}</TableCell>
+                        <TableCell className="text-right text-xs">{qnaHistory.length - index}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -367,5 +367,7 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
 
     
