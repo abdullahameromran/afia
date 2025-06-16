@@ -6,11 +6,13 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2, Star, MessageSquare } from 'lucide-react';
+import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2 as BarChartIconLucide, Star, MessageSquare } from 'lucide-react'; // Renamed BarChart2 to avoid conflict
 import Image from 'next/image';
-import { supabase } from '@/lib/supabaseClient'; 
+import { supabase } from '@/lib/supabaseClient';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 
 interface QnaEntry {
   id: number;
@@ -29,7 +31,15 @@ interface AnalyticsData {
   uniqueUsers: number;
   averageRating?: number;
   totalReviewsWithText: number;
+  questionsByAgeGroupChartData?: Array<{ name: string; questions: number }>;
 }
+
+const chartConfig = {
+  questions: {
+    label: "عدد الأسئلة",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig;
 
 export default function AdminPage() {
   const { isAuthenticated, logout, isLoading: authIsLoading } = useAuth();
@@ -50,8 +60,8 @@ export default function AdminPage() {
       const fetchHistoryAndAnalyze = async () => {
         setHistoryLoading(true);
         setHistoryError(null);
-        setAnalytics(null); 
-        
+        setAnalytics(null);
+
         if (!supabase) {
             console.warn("Supabase client is not initialized. Cannot fetch Q&A history. Please check Supabase configuration in .env.");
             setHistoryError("فشل الاتصال بخدمة تخزين البيانات. يرجى التحقق من إعدادات الاتصال وملف .env.");
@@ -68,19 +78,22 @@ export default function AdminPage() {
           if (error) {
             throw error;
           }
-          
+
           if (data) {
             const typedData = data as QnaEntry[];
             setQnaHistory(typedData);
 
-            // Calculate analytics
             const totalQuestions = typedData.length;
-            
+
             const ageGroupCounts = typedData.reduce((acc, entry) => {
               const ageLabel = entry.age_label || 'غير محدد';
               acc[ageLabel] = (acc[ageLabel] || 0) + 1;
               return acc;
             }, {} as Record<string, number>);
+
+            const ageGroupChartData = Object.entries(ageGroupCounts)
+              .map(([name, count]) => ({ name, questions: count }))
+              .sort((a, b) => b.questions - a.questions);
 
             const uniqueUserNames = new Set(typedData.map(entry => entry.userName).filter(Boolean as (value: string | null | undefined) => value is string));
             const uniqueUsers = uniqueUserNames.size;
@@ -89,17 +102,25 @@ export default function AdminPage() {
             const averageRating = ratings.length > 0 ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length : undefined;
             const totalReviewsWithText = typedData.filter(entry => entry.review_text && entry.review_text.trim() !== '').length;
 
-
             setAnalytics({
               totalQuestions,
               questionsByAgeGroup: ageGroupCounts,
               uniqueUsers,
               averageRating,
               totalReviewsWithText,
+              questionsByAgeGroupChartData: ageGroupChartData,
             });
 
           } else {
              setQnaHistory([]);
+             setAnalytics({ // Set empty analytics if no data
+                totalQuestions: 0,
+                questionsByAgeGroup: {},
+                uniqueUsers: 0,
+                averageRating: undefined,
+                totalReviewsWithText: 0,
+                questionsByAgeGroupChartData: [],
+             });
           }
         } catch (err: any) {
           console.error("Error fetching Q&A history from Supabase:", err);
@@ -162,7 +183,7 @@ export default function AdminPage() {
            <Image
               src="https://be13a6bfb72b1843b287a4c59c4f4174.cdn.bubble.io/f1749070664202x663207571008088400/8624f5b1-c5a3-438a-bbfa-4c1deda79052.jpg"
               alt="أ.د/ عايدة عبدالرازق"
-              width={56} 
+              width={56}
               height={56}
               className="rounded-full border-2 border-white shadow-sm object-cover"
               data-ai-hint="doctor portrait"
@@ -171,7 +192,7 @@ export default function AdminPage() {
             <h1 className="font-headline text-2xl sm:text-3xl font-bold text-primary">
               صحتكِ تهمنا
             </h1>
-            <Heart size={30} className="text-primary" /> 
+            <Heart size={30} className="text-primary" />
         </div>
         <div className="flex flex-col items-end">
             <h2 className="text-2xl sm:text-3xl font-headline text-primary">لوحة تحكم الإدارة</h2>
@@ -186,7 +207,7 @@ export default function AdminPage() {
         <Card className="shadow-lg">
           <CardHeader className="text-right">
             <CardTitle className="text-2xl text-primary flex items-center justify-end gap-2">
-              <BarChart2 />
+              <BarChartIconLucide />
               إحصائيات الاستخدام
             </CardTitle>
             <CardDescription className="text-right">
@@ -206,7 +227,7 @@ export default function AdminPage() {
               </p>
             )}
             {!historyLoading && !historyError && analytics && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 text-sm">
                 <div className="space-y-1">
                   <h3 className="font-semibold text-lg">الملخص العام:</h3>
                   <p>إجمالي عدد الأسئلة: {analytics.totalQuestions}</p>
@@ -218,28 +239,57 @@ export default function AdminPage() {
                    {analytics.averageRating === undefined && analytics.totalQuestions > 0 && (
                      <p>متوسط التقييم (بالنجوم): لا توجد تقييمات كافية</p>
                   )}
-                </div>
-                {Object.keys(analytics.questionsByAgeGroup).length > 0 && (
-                  <div>
-                    <h3 className="font-semibold text-lg mt-4 md:mt-0">الأسئلة حسب الفئة العمرية:</h3>
-                    <ul className="list-disc list-inside pr-5 space-y-1">
-                      {Object.entries(analytics.questionsByAgeGroup).sort(([, countA], [, countB]) => countB - countA).map(([ageGroup, count]) => (
-                        <li key={ageGroup}>{ageGroup}: {count} سؤال</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                 {analytics.totalQuestions === 0 && (
-                    <p className="text-muted-foreground text-center py-6 md:col-span-2">
-                        لا توجد أسئلة مسجلة لعرض الإحصائيات.
+                   {analytics.totalQuestions === 0 && (
+                    <p className="text-muted-foreground mt-2">
+                        لا توجد أسئلة مسجلة لعرض ملخص الإحصائيات.
                     </p>
                  )}
+                </div>
+
+                {analytics.questionsByAgeGroupChartData && analytics.questionsByAgeGroupChartData.length > 0 ? (
+                  <div className="h-[300px] md:h-[350px] mt-4 md:mt-0">
+                    <h3 className="font-semibold text-lg mb-2 text-center md:text-right">الأسئلة حسب الفئة العمرية:</h3>
+                    <ResponsiveContainer width="100%" height="100%">
+                       <ChartContainer config={chartConfig} className="w-full h-full">
+                        <BarChart
+                            accessibilityLayer
+                            data={analytics.questionsByAgeGroupChartData}
+                            layout="vertical"
+                            margin={{ left: 10, right: 10, top: 5, bottom: 5 }}
+                        >
+                          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                          <XAxis type="number" dataKey="questions" allowDecimals={false} />
+                          <YAxis
+                            dataKey="name"
+                            type="category"
+                            width={110} // Adjusted for potentially longer labels in Arabic
+                            interval={0}
+                            tick={{ fontSize: 10, fill: 'hsl(var(--foreground))' }}
+                          />
+                          <Tooltip
+                            cursor={{ fill: 'hsl(var(--muted))' }}
+                            content={<ChartTooltipContent indicator="dot" />}
+                          />
+                          <Bar dataKey="questions" fill="var(--color-questions)" radius={[0, 4, 4, 0]} barSize={20} />
+                        </BarChart>
+                      </ChartContainer>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  analytics.totalQuestions > 0 && (
+                    <div className="flex items-center justify-center h-[300px] md:h-[350px] mt-4 md:mt-0 bg-muted/30 rounded-md">
+                        <p className="text-muted-foreground text-center p-4">
+                        لا توجد بيانات أسئلة موزعة حسب الفئة العمرية لعرض الرسم البياني.
+                        </p>
+                    </div>
+                  )
+                )}
               </div>
             )}
-            {!historyLoading && !historyError && !analytics && qnaHistory.length === 0 && (
-              <p className="text-muted-foreground text-center py-6">
-                لا توجد بيانات كافية لعرض الإحصائيات.
-              </p>
+             {!historyLoading && !historyError && (!analytics || analytics.totalQuestions === 0) && (
+                <p className="text-muted-foreground text-center py-6">
+                    لا توجد بيانات كافية لعرض الإحصائيات.
+                </p>
             )}
           </CardContent>
         </Card>
@@ -318,3 +368,4 @@ export default function AdminPage() {
   );
 }
 
+    
