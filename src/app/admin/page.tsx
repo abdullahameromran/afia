@@ -262,7 +262,7 @@ export default function AdminPage() {
                           <YAxis
                             dataKey="name"
                             type="category"
-                            width={160} 
+                            width={110} 
                             interval={0}
                             tick={{ fontSize: 10, fill: 'hsl(var(--foreground))' }}
                           />
