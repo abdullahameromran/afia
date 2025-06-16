@@ -28,11 +28,12 @@ const qnaFormSchema = z.object({
 
 type QnaFormValues = z.infer<typeof qnaFormSchema>;
 
-const reviewFormSchema = z.object({
-    rating: z.number().min(1).max(5).optional(),
-    reviewText: z.string().optional(),
-});
-type ReviewFormValues = z.infer<typeof reviewFormSchema>;
+// Review form schema is not used with react-hook-form for this simple implementation
+// const reviewFormSchema = z.object({
+//     rating: z.number().min(1).max(5).optional(),
+//     reviewText: z.string().optional(),
+// });
+// type ReviewFormValues = z.infer<typeof reviewFormSchema>;
 
 
 export function QnaForm() {
@@ -54,7 +55,7 @@ export function QnaForm() {
     resolver: zodResolver(qnaFormSchema),
     defaultValues: {
       username: '',
-      lifeStage: '', 
+      lifeStage: '' as unknown as number, // Initialize for number input
       question: '',
     },
   });
@@ -200,6 +201,7 @@ export function QnaForm() {
                       type="number"
                       placeholder="مثال: 25"
                       {...field}
+                      onChange={e => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
                       className="shadow-inner text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </FormControl>
@@ -277,8 +279,8 @@ export function QnaForm() {
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleReviewSubmit} className="space-y-4">
-                    <div>
-                      <FormLabel className="block text-right mb-2">التقييم (اختياري)</FormLabel>
+                    <div className="space-y-1">
+                      <label className="block text-right mb-2 text-sm font-medium leading-none">التقييم (اختياري)</label>
                       <div className="flex justify-center gap-1 mb-2" dir="ltr">
                         {[5, 4, 3, 2, 1].map((star) => (
                           <Button
@@ -294,23 +296,16 @@ export function QnaForm() {
                         ))}
                       </div>
                     </div>
-                    <FormField
-                        name="reviewText"
-                        render={() => ( // No control needed from react-hook-form here
-                            <FormItem>
-                                <FormLabel htmlFor="reviewText" className="block text-right">تعليقكِ (اختياري)</FormLabel>
-                                <FormControl>
-                                <Textarea
-                                    id="reviewText"
-                                    placeholder="اكتبي تعليقكِ هنا..."
-                                    value={reviewText}
-                                    onChange={(e) => setReviewText(e.target.value)}
-                                    className="min-h-[80px] text-right shadow-inner"
-                                />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
+                    <div className="space-y-1">
+                        <label htmlFor="reviewText" className="block text-right text-sm font-medium leading-none">تعليقكِ (اختياري)</label>
+                        <Textarea
+                            id="reviewText"
+                            placeholder="اكتبي تعليقكِ هنا..."
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                            className="min-h-[80px] text-right shadow-inner"
+                        />
+                    </div>
                     <Button type="submit" disabled={isSubmittingReview} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
                       {isSubmittingReview ? (
                         <>
@@ -340,3 +335,4 @@ export function QnaForm() {
     </Card>
   );
 }
+
