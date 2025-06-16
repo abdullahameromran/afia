@@ -8,19 +8,17 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-// import { Label } from '@/components/ui/label'; // Not directly used, but FormLabel depends on it
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-// Select components are no longer needed for age
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, AlertTriangle, Info, ChevronDown } from 'lucide-react';
+import { Loader2, AlertTriangle, Info, Star, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { lifeStagesData, type LifeStage, type StageSection, type HealthTip, type Subsection, getLifeStageFromAge } from '@/lib/lifeStagesData';
+import { lifeStagesData, type LifeStage, getLifeStageFromAge } from '@/lib/lifeStagesData';
 import { answerWomensHealthQuestion, type AnswerWomensHealthQuestionInput, type AnswerWomensHealthQuestionOutput } from '@/ai/flows/answer-womens-health-questions';
+import { submitQnaReview, type SubmitQnaReviewInput, type SubmitQnaReviewOutput } from '@/ai/flows/submit-qna-review-flow';
 
-const formSchema = z.object({
+const qnaFormSchema = z.object({
   username: z.string().min(1, { message: "الرجاء إدخال اسمكِ" }),
-  lifeStage: z.coerce // This field now represents numeric age
+  lifeStage: z.coerce 
     .number({ invalid_type_error: "الرجاء إدخال العمر كأرقام." })
     .min(10, { message: "العمر يجب أن يكون 10 سنوات على الأقل." })
     .max(120, { message: "الرجاء إدخال عمر صحيح (حتى 120 سنة)." })
@@ -28,28 +26,42 @@ const formSchema = z.object({
   question: z.string().min(10, { message: "الرجاء إدخال سؤال واضح (10 أحرف على الأقل)" }),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type QnaFormValues = z.infer<typeof qnaFormSchema>;
+
+const reviewFormSchema = z.object({
+    rating: z.number().min(1).max(5).optional(),
+    reviewText: z.string().optional(),
+});
+type ReviewFormValues = z.infer<typeof reviewFormSchema>;
+
 
 export function QnaForm() {
-  const [response, setResponse] = useState<string | null>(null);
+  const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedStageInfo, setSelectedStageInfo] = useState<LifeStage | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const [qnaRecordId, setQnaRecordId] = useState<number | null>(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [currentRating, setCurrentRating] = useState<number | undefined>(undefined);
+  const [reviewText, setReviewText] = useState<string>("");
+
+
+  const qnaForm = useForm<QnaFormValues>({
+    resolver: zodResolver(qnaFormSchema),
     defaultValues: {
       username: '',
-      lifeStage: '', // Changed from undefined to empty string
+      lifeStage: '', 
       question: '',
     },
   });
 
-  const watchedAge = form.watch('lifeStage');
+  const watchedAge = qnaForm.watch('lifeStage');
 
   useEffect(() => {
-    // watchedAge will be a string from the form input, or a number if coerced by RHF internally
     let numericWatchedAge: number | undefined = undefined;
     if (typeof watchedAge === 'string' && watchedAge !== '') {
         numericWatchedAge = Number(watchedAge);
@@ -65,17 +77,20 @@ export function QnaForm() {
     }
   }, [watchedAge]);
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+  const onQnaSubmit: SubmitHandler<QnaFormValues> = async (data) => {
     setIsLoading(true);
     setError(null);
-    setResponse(null);
+    setAiResponse(null);
+    setShowReviewForm(false);
+    setReviewSubmitted(false);
+    setQnaRecordId(null);
+    setCurrentRating(undefined);
+    setReviewText("");
 
-    // data.lifeStage will be a number here due to Zod coercion by react-hook-form's handleSubmit
+
     const { username, question, lifeStage: ageValueNumber } = data; 
-    
     const matchedStage = getLifeStageFromAge(ageValueNumber);
     const textualAgeLabel = matchedStage ? matchedStage.label : "مرحلة عمرية غير محددة";
-
 
     const inputPayload: AnswerWomensHealthQuestionInput = {
       question,
@@ -85,10 +100,16 @@ export function QnaForm() {
     };
     
     try {
-      const aiResponse: AnswerWomensHealthQuestionOutput = await answerWomensHealthQuestion(inputPayload);
+      const responseOutput: AnswerWomensHealthQuestionOutput = await answerWomensHealthQuestion(inputPayload);
       
-      if (aiResponse && aiResponse.answer) {
-        setResponse(aiResponse.answer); 
+      if (responseOutput && responseOutput.answer) {
+        setAiResponse(responseOutput.answer);
+        if (responseOutput.qnaId) {
+          setQnaRecordId(responseOutput.qnaId);
+          setShowReviewForm(true); 
+        } else {
+            console.warn("QnA ID not returned from flow, review cannot be submitted for this entry.");
+        }
       } else {
         throw new Error("لم يتمكن الذكاء الاصطناعي من إنشاء إجابة.");
       }
@@ -107,46 +128,54 @@ export function QnaForm() {
     }
   };
   
-  const renderHealthTips = (tips: HealthTip[]) => (
-    <ul className="space-y-3 list-inside text-right pr-4">
-      {tips.map(tip => (
-        <li key={tip.title}>
-          <strong className="text-primary">{tip.title}:</strong>
-          <ul className="mr-4 mt-1 space-y-1 list-disc list-inside text-right">
-            {tip.points.map((point, i) => <li key={i} className="text-sm">{point}</li>)}
-          </ul>
-        </li>
-      ))}
-    </ul>
-  );
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!qnaRecordId) {
+      toast({ variant: "destructive", title: "خطأ", description: "لا يمكن إرسال التقييم بدون معرف السؤال." });
+      return;
+    }
+    if (currentRating === undefined && reviewText.trim() === "") {
+        toast({ variant: "destructive", title: "خطأ", description: "الرجاء تقديم تقييم نجوم أو كتابة تعليق." });
+        return;
+    }
 
-  const renderSubsections = (subsections: Subsection[]) => (
-     <ul className="space-y-3 list-inside text-right pr-4">
-      {subsections.map(subsection => (
-        <li key={subsection.title}>
-          <strong className="text-primary">{subsection.title}:</strong>
-          <ul className="mr-4 mt-1 space-y-1 list-disc list-inside text-right">
-            {subsection.details.map((detail, i) => <li key={i} className="text-sm">{detail}</li>)}
-          </ul>
-        </li>
-      ))}
-    </ul>
-  );
-  
-  const renderPoints = (points: string[]) => (
-    <ul className="mr-0 mt-1 space-y-1 list-disc list-inside text-right pr-4">
-        {points.map((point, i) => <li key={i} className="text-sm">{point}</li>)}
-    </ul>
-  );
+    setIsSubmittingReview(true);
+    const reviewPayload: SubmitQnaReviewInput = {
+      qnaId: qnaRecordId,
+      rating: currentRating,
+      reviewText: reviewText.trim() === "" ? undefined : reviewText,
+    };
+
+    try {
+      const result: SubmitQnaReviewOutput = await submitQnaReview(reviewPayload);
+      if (result.success) {
+        toast({ title: "شكراً لك!", description: result.message || "تم إرسال تقييمك بنجاح." });
+        setReviewSubmitted(true);
+        setShowReviewForm(false);
+      } else {
+        throw new Error(result.message || "فشل إرسال التقييم.");
+      }
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : "حدث خطأ أثناء إرسال التقييم.";
+      setError(errorMessage); // Consider if this error should be separate from QnA error
+      toast({
+        variant: "destructive",
+        title: "خطأ في التقييم",
+        description: errorMessage,
+      });
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
 
   return (
     <Card className="w-full shadow-xl bg-card text-right" dir="rtl">
       <CardContent className="p-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Form {...qnaForm}>
+          <form onSubmit={qnaForm.handleSubmit(onQnaSubmit)} className="space-y-6">
             <FormField
-              control={form.control}
+              control={qnaForm.control}
               name="username"
               render={({ field }) => (
                 <FormItem>
@@ -160,8 +189,8 @@ export function QnaForm() {
             />
 
             <FormField
-              control={form.control}
-              name="lifeStage" // This field now represents numeric age
+              control={qnaForm.control}
+              name="lifeStage" 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="lifeStage" className="block text-right">عمركِ (بالسنوات)</FormLabel>
@@ -171,7 +200,6 @@ export function QnaForm() {
                       type="number"
                       placeholder="مثال: 25"
                       {...field}
-                      // value will be managed by react-hook-form, initially ''
                       className="shadow-inner text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </FormControl>
@@ -180,50 +208,8 @@ export function QnaForm() {
               )}
             />
 
-            {/* 
-            {selectedStageInfo && (
-              <Card className="mt-4 bg-background border-primary/30 shadow-md" dir="rtl">
-                <CardHeader className="w-full pb-2 flex flex-col items-start">
-                  <CardTitle className="w-full text-xl font-headline text-primary flex items-center gap-2 justify-start">
-                     <Info size={20}/> <span className="text-right">معلومات حول: {selectedStageInfo.label}</span>
-                  </CardTitle>
-                  <CardDescription className="w-full text-right">
-                    هذه معلومات عامة تناسب العمر الذي أدخلتيه. يمكنكِ طرح أسئلة أكثر تحديدًا أدناه.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Accordion type="single" collapsible className="w-full" dir="rtl">
-                    {selectedStageInfo.info.map((section, index) => (
-                      <AccordionItem value={`item-${index}`} key={section.title}>
-                        <AccordionTrigger className="font-semibold hover:no-underline text-primary/90 text-right justify-between w-full">
-                          <span className="text-right flex-grow">{section.title}</span>
-                        </AccordionTrigger>
-                        <AccordionContent className="text-right space-y-2 pt-2 pr-2">
-                          {section.description && <p className="text-sm text-muted-foreground text-right">{section.description}</p>}
-                          {section.subsections && renderSubsections(section.subsections)}
-                          {section.points && renderPoints(section.points)}
-                          {section.tips && renderHealthTips(section.tips)}
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                    {selectedStageInfo.generalSummaryPoints && selectedStageInfo.generalSummaryPoints.length > 0 && (
-                       <AccordionItem value="general-summary">
-                         <AccordionTrigger className="font-semibold hover:no-underline text-primary/90 text-right justify-between w-full">
-                           <span className="text-right flex-grow">نقاط رئيسية للتثقيف الصحي</span>
-                           </AccordionTrigger>
-                         <AccordionContent className="text-right space-y-1 pt-2 pr-2">
-                           {renderPoints(selectedStageInfo.generalSummaryPoints)}
-                         </AccordionContent>
-                       </AccordionItem>
-                    )}
-                  </Accordion>
-                </CardContent>
-              </Card>
-            )}
-            */}
-
             <FormField
-              control={form.control}
+              control={qnaForm.control}
               name="question"
               render={({ field }) => (
                 <FormItem>
@@ -242,7 +228,7 @@ export function QnaForm() {
               )}
             />
 
-            <Button type="submit" disabled={isLoading} className="w-full font-bold text-lg py-3 h-auto">
+            <Button type="submit" disabled={isLoading || showReviewForm} className="w-full font-bold text-lg py-3 h-auto">
               {isLoading ? (
                 <>
                   <Loader2 className="ml-2 h-5 w-5 animate-spin" />
@@ -265,7 +251,7 @@ export function QnaForm() {
           </div>
         )}
 
-        {response && !error && (
+        {aiResponse && !error && (
           <div className="mt-8 transition-opacity duration-500 ease-in-out opacity-100">
             <Card className="bg-background border-r-[6px] border-primary shadow-md text-right" dir="rtl">
               <CardHeader>
@@ -273,14 +259,84 @@ export function QnaForm() {
               </CardHeader>
               <CardContent>
                 <p className="text-lg leading-relaxed text-right whitespace-pre-line">
-                  {response}
+                  {aiResponse}
                 </p>
               </CardContent>
             </Card>
+
+            {showReviewForm && !reviewSubmitted && qnaRecordId && (
+              <Card className="mt-6 shadow-lg bg-card border-t-4 border-accent">
+                <CardHeader>
+                  <CardTitle className="text-xl font-headline text-accent-foreground flex items-center gap-2">
+                    <Star className="text-accent" />
+                    ما هو تقييمكِ لهذه الإجابة؟
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    ساعدينا على تحسين الخدمة بتقديم تقييمكِ.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleReviewSubmit} className="space-y-4">
+                    <div>
+                      <FormLabel className="block text-right mb-2">التقييم (اختياري)</FormLabel>
+                      <div className="flex justify-center gap-1 mb-2" dir="ltr">
+                        {[5, 4, 3, 2, 1].map((star) => (
+                          <Button
+                            key={star}
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setCurrentRating(star)}
+                            className={`p-1 ${currentRating !== undefined && currentRating >= star ? 'text-yellow-400' : 'text-muted-foreground hover:text-yellow-300'}`}
+                          >
+                            <Star fill={currentRating !== undefined && currentRating >= star ? 'currentColor' : 'none'} className="h-7 w-7" />
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    <FormField
+                        name="reviewText"
+                        render={() => ( // No control needed from react-hook-form here
+                            <FormItem>
+                                <FormLabel htmlFor="reviewText" className="block text-right">تعليقكِ (اختياري)</FormLabel>
+                                <FormControl>
+                                <Textarea
+                                    id="reviewText"
+                                    placeholder="اكتبي تعليقكِ هنا..."
+                                    value={reviewText}
+                                    onChange={(e) => setReviewText(e.target.value)}
+                                    className="min-h-[80px] text-right shadow-inner"
+                                />
+                                </FormControl>
+                            </FormItem>
+                        )}
+                    />
+                    <Button type="submit" disabled={isSubmittingReview} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+                      {isSubmittingReview ? (
+                        <>
+                          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                          جاري إرسال التقييم...
+                        </>
+                      ) : (
+                        <>
+                         <MessageSquare className="ml-2 h-5 w-5" />
+                          إرسال التقييم
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+            {reviewSubmitted && (
+                 <div className="mt-6 p-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-r-4 border-green-500 rounded flex items-center gap-3 text-right" dir="rtl">
+                    <Info className="h-5 w-5 flex-shrink-0" />
+                    <p className="font-semibold">شكراً لكِ، تم استلام تقييمك!</p>
+                </div>
+            )}
           </div>
         )}
       </CardContent>
     </Card>
   );
 }
-

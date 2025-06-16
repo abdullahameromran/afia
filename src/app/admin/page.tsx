@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2 } from 'lucide-react';
+import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2, Star, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient'; 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -18,13 +18,17 @@ interface QnaEntry {
   userName?: string;
   age_label?: string;
   answer: string;
-  timestamp: string; 
+  timestamp: string;
+  rating?: number;
+  review_text?: string;
 }
 
 interface AnalyticsData {
   totalQuestions: number;
   questionsByAgeGroup: Record<string, number>;
   uniqueUsers: number;
+  averageRating?: number;
+  totalReviewsWithText: number;
 }
 
 export default function AdminPage() {
@@ -66,24 +70,32 @@ export default function AdminPage() {
           }
           
           if (data) {
-            setQnaHistory(data as QnaEntry[]);
+            const typedData = data as QnaEntry[];
+            setQnaHistory(typedData);
 
             // Calculate analytics
-            const totalQuestions = data.length;
+            const totalQuestions = typedData.length;
             
-            const ageGroupCounts = data.reduce((acc, entry) => {
+            const ageGroupCounts = typedData.reduce((acc, entry) => {
               const ageLabel = entry.age_label || 'غير محدد';
               acc[ageLabel] = (acc[ageLabel] || 0) + 1;
               return acc;
             }, {} as Record<string, number>);
 
-            const uniqueUserNames = new Set(data.map(entry => entry.userName).filter(Boolean as (value: string | null | undefined) => value is string));
+            const uniqueUserNames = new Set(typedData.map(entry => entry.userName).filter(Boolean as (value: string | null | undefined) => value is string));
             const uniqueUsers = uniqueUserNames.size;
+
+            const ratings = typedData.filter(entry => typeof entry.rating === 'number').map(entry => entry.rating as number);
+            const averageRating = ratings.length > 0 ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length : undefined;
+            const totalReviewsWithText = typedData.filter(entry => entry.review_text && entry.review_text.trim() !== '').length;
+
 
             setAnalytics({
               totalQuestions,
               questionsByAgeGroup: ageGroupCounts,
               uniqueUsers,
+              averageRating,
+              totalReviewsWithText,
             });
 
           } else {
@@ -129,6 +141,20 @@ export default function AdminPage() {
     );
   }
 
+  const renderStars = (rating: number | undefined) => {
+    if (rating === undefined || rating === null) return '-';
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Star
+          key={i}
+          className={`inline-block h-4 w-4 ${i <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+        />
+      );
+    }
+    return <div className="flex">{stars}</div>;
+  };
+
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-gradient-to-br from-[#FCE4EC] to-[#F8BBD0] p-4 sm:p-8 text-right" dir="rtl">
       <header className="w-full max-w-6xl mb-8 flex justify-between items-center">
@@ -164,7 +190,7 @@ export default function AdminPage() {
               إحصائيات الاستخدام
             </CardTitle>
             <CardDescription className="text-right">
-              نظرة عامة على تفاعلات المستخدمين مع قسم الأسئلة والأجوبة.
+              نظرة عامة على تفاعلات المستخدمين مع قسم الأسئلة والأجوبة والتقييمات.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -180,15 +206,22 @@ export default function AdminPage() {
               </p>
             )}
             {!historyLoading && !historyError && analytics && (
-              <div className="space-y-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <div className="space-y-1">
                   <h3 className="font-semibold text-lg">الملخص العام:</h3>
                   <p>إجمالي عدد الأسئلة: {analytics.totalQuestions}</p>
                   <p>عدد المستخدمين (حسب الأسماء الفريدة): {analytics.uniqueUsers}</p>
+                  <p>إجمالي المراجعات النصية: {analytics.totalReviewsWithText}</p>
+                  {analytics.averageRating !== undefined && (
+                     <p>متوسط التقييم (بالنجوم): {analytics.averageRating.toFixed(2)} / 5</p>
+                  )}
+                   {analytics.averageRating === undefined && analytics.totalQuestions > 0 && (
+                     <p>متوسط التقييم (بالنجوم): لا توجد تقييمات كافية</p>
+                  )}
                 </div>
                 {Object.keys(analytics.questionsByAgeGroup).length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-lg mt-4">الأسئلة حسب الفئة العمرية:</h3>
+                    <h3 className="font-semibold text-lg mt-4 md:mt-0">الأسئلة حسب الفئة العمرية:</h3>
                     <ul className="list-disc list-inside pr-5 space-y-1">
                       {Object.entries(analytics.questionsByAgeGroup).sort(([, countA], [, countB]) => countB - countA).map(([ageGroup, count]) => (
                         <li key={ageGroup}>{ageGroup}: {count} سؤال</li>
@@ -197,7 +230,7 @@ export default function AdminPage() {
                   </div>
                 )}
                  {analytics.totalQuestions === 0 && (
-                    <p className="text-muted-foreground text-center py-6">
+                    <p className="text-muted-foreground text-center py-6 md:col-span-2">
                         لا توجد أسئلة مسجلة لعرض الإحصائيات.
                     </p>
                  )}
@@ -215,10 +248,10 @@ export default function AdminPage() {
           <CardHeader className="text-right">
             <CardTitle className="text-2xl text-primary flex items-center justify-end gap-2">
               <ListChecks />
-              عرض سجل الأسئلة والأجوبة
+              عرض سجل الأسئلة والأجوبة والتقييمات
             </CardTitle>
             <CardDescription className="text-right">
-              جميع الأسئلة التي طرحها المستخدمون والإجابات المقدمة من النظام، محفوظة في خدمة تخزين البيانات.
+              جميع الأسئلة، الإجابات، والتقييمات المدخلة من المستخدمين.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -246,23 +279,27 @@ export default function AdminPage() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
-                      <TableHead className="w-[150px] text-right">الوقت</TableHead>
-                      <TableHead className="w-[120px] text-right">المستخدم</TableHead>
-                      <TableHead className="w-[180px] text-right">المرحلة العمرية</TableHead>
-                      <TableHead className="text-right">السؤال</TableHead>
-                      <TableHead className="text-right">الإجابة</TableHead>
+                      <TableHead className="w-[130px] text-right">الوقت</TableHead>
+                      <TableHead className="w-[100px] text-right">المستخدم</TableHead>
+                      <TableHead className="w-[150px] text-right">المرحلة العمرية</TableHead>
+                      <TableHead className="text-right min-w-[200px]">السؤال</TableHead>
+                      <TableHead className="text-right min-w-[250px]">الإجابة</TableHead>
+                      <TableHead className="w-[80px] text-right">التقييم</TableHead>
+                      <TableHead className="text-right min-w-[150px]">المراجعة</TableHead>
                       <TableHead className="w-[50px] text-right">م</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {qnaHistory.map((entry, index) => (
                       <TableRow key={entry.id}>
-                        <TableCell className="text-right">{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
-                        <TableCell className="text-right">{entry.userName || '-'}</TableCell>
-                        <TableCell className="text-right">{entry.age_label || '-'}</TableCell>
-                        <TableCell className="whitespace-pre-wrap max-w-sm break-words text-right">{entry.question}</TableCell>
-                        <TableCell className="whitespace-pre-wrap max-w-md break-words text-right">{entry.answer}</TableCell>
-                        <TableCell className="text-right">{index + 1}</TableCell>
+                        <TableCell className="text-right text-xs">{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
+                        <TableCell className="text-right text-xs">{entry.userName || '-'}</TableCell>
+                        <TableCell className="text-right text-xs">{entry.age_label || '-'}</TableCell>
+                        <TableCell className="whitespace-pre-wrap max-w-xs break-words text-right text-xs">{entry.question}</TableCell>
+                        <TableCell className="whitespace-pre-wrap max-w-sm break-words text-right text-xs">{entry.answer}</TableCell>
+                        <TableCell className="text-right text-xs">{renderStars(entry.rating)}</TableCell>
+                        <TableCell className="whitespace-pre-wrap max-w-xs break-words text-right text-xs">{entry.review_text || '-'}</TableCell>
+                        <TableCell className="text-right text-xs">{index + 1}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -280,3 +317,4 @@ export default function AdminPage() {
     </div>
   );
 }
+

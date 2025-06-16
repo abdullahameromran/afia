@@ -4,7 +4,7 @@
 /**
  * @fileOverview This file defines a Genkit flow for answering women's health questions.
  *
- * - answerWomensHealthQuestion - A function that accepts a question and returns an answer.
+ * - answerWomensHealthQuestion - A function that accepts a question and returns an answer and Q&A record ID.
  * - AnswerWomensHealthQuestionInput - The input type for the answerWomensHealthQuestion function.
  * - AnswerWomensHealthQuestionOutput - The return type for the answerWomensHealthQuestion function.
  */
@@ -24,6 +24,7 @@ export type AnswerWomensHealthQuestionInput = z.infer<typeof AnswerWomensHealthQ
 
 const AnswerWomensHealthQuestionOutputSchema = z.object({
   answer: z.string().describe('The answer to the question about women\'s health, in Arabic. This answer should include general scientific information and a disclaimer to consult a doctor.'),
+  qnaId: z.number().optional().describe('The ID of the Q&A record saved in the database.'),
 });
 
 export type AnswerWomensHealthQuestionOutput = z.infer<typeof AnswerWomensHealthQuestionOutputSchema>;
@@ -50,25 +51,29 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
   const flowResult = await answerWomensHealthQuestionFlow(input);
   const supabase = createSupabaseServiceRoleClient();
+  let qnaIdForOutput: number | undefined = undefined;
 
   if (flowResult?.answer && supabase) {
     try {
-      const { error } = await supabase
+      const { data: insertedData, error: insertError } = await supabase
         .from('qnaHistory')
         .insert([
           { 
             question: input.question,
             userName: input.userName || null, 
-            age_label: input.textualAgeLabel || null, // Save the textual label
+            age_label: input.textualAgeLabel || null, 
             answer: flowResult.answer,
             // timestamp is handled by DB default NOW()
           }
-        ]);
+        ])
+        .select('id') 
+        .single();
 
-      if (error) {
-        console.error("Error saving Q&A history to Supabase:", error);
-      } else {
-        console.log("Q&A history saved to Supabase");
+      if (insertError) {
+        console.error("Error saving Q&A history to Supabase:", insertError);
+      } else if (insertedData) {
+        console.log("Q&A history saved to Supabase with ID:", insertedData.id);
+        qnaIdForOutput = insertedData.id;
       }
     } catch (e) {
       console.error("Exception saving Q&A history to Supabase:", e);
@@ -78,13 +83,14 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
   } else if (!flowResult?.answer) {
     console.warn("AI flow did not return an answer. Skipping save of Q&A history.");
   }
-  return flowResult;
+  
+  return { answer: flowResult.answer, qnaId: qnaIdForOutput };
 }
 
 const answerWomensHealthQuestionPrompt = ai.definePrompt({
   name: 'answerWomensHealthQuestionPrompt',
   input: {schema: AnswerWomensHealthQuestionInputSchema},
-  output: {schema: AnswerWomensHealthQuestionOutputSchema},
+  output: {schema: AnswerWomensHealthQuestionOutputSchema}, // Output schema now expects qnaId potentially, but prompt itself only produces 'answer'
   tools: [filterUnwantedTextTool],
   prompt: `You are a supportive and informative AI assistant specializing in women's health, including topics related to pregnancy, childbirth, family planning, and general female healthcare. Your goal is to provide scientifically-grounded general information and context, like a knowledgeable guide. ALL RESPONSES MUST BE IN ARABIC.
 
@@ -117,12 +123,13 @@ const answerWomensHealthQuestionFlow = ai.defineFlow(
   {
     name: 'answerWomensHealthQuestionFlow',
     inputSchema: AnswerWomensHealthQuestionInputSchema,
-    outputSchema: AnswerWomensHealthQuestionOutputSchema,
+    // The flow's direct output schema will just be the answer string from the prompt.
+    // The qnaId is handled in the wrapper function.
+    outputSchema: z.object({ answer: z.string() }),
   },
   async input => {
     const {output} = await answerWomensHealthQuestionPrompt(input);
     if (!output?.answer) {
-        // Log or handle cases where the AI doesn't return an answer as expected
         console.warn("answerWomensHealthQuestionPrompt did not return an answer in output object.");
         return { answer: "لم أتمكن من إنشاء إجابة. يرجى المحاولة مرة أخرى أو إعادة صياغة سؤالك." };
     }
@@ -134,3 +141,4 @@ const answerWomensHealthQuestionFlow = ai.defineFlow(
     };
   }
 );
+
