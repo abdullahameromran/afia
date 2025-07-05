@@ -11,6 +11,7 @@ import {
 import { PeriodTracker } from '@/components/period-tracker';
 import { OvulationTracker } from '@/components/ovulation-tracker';
 import { RemindersDisplay } from '@/components/reminders-display';
+import { ReviewsDisplay } from '@/components/reviews-display';
 import { Button } from '@/components/ui/button';
 import type { HealthTip, Subsection, StageSection } from '@/lib/lifeStagesData';
 import { lifeStagesData as originalLifeStageSectionsData } from '@/lib/lifeStagesData';
@@ -300,6 +301,8 @@ export default function HomePage() {
         </section>
 
         <ClientQnaFormWrapper />
+
+        <ReviewsDisplay />
 
         <section className="mt-12 mb-8 text-center">
           <h2 className="font-headline text-2xl sm:text-3xl font-bold text-primary mb-6">
