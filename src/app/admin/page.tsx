@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2 as BarChartIconLucide, Star, MessageSquare } from 'lucide-react'; // Renamed BarChart2 to avoid conflict
+import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2 as BarChartIconLucide, Star, MessageSquare, Users2 } from 'lucide-react'; // Renamed BarChart2 to avoid conflict
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -227,28 +227,42 @@ export default function AdminPage() {
               </p>
             )}
             {!historyLoading && !historyError && analytics && (
-              <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 text-sm">
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-lg">الملخص العام:</h3>
-                  <p>إجمالي عدد الأسئلة: {analytics.totalQuestions}</p>
-                  <p>عدد المستخدمين (حسب الأسماء الفريدة): {analytics.uniqueUsers}</p>
-                  <p>إجمالي المراجعات النصية: {analytics.totalReviewsWithText}</p>
-                  {analytics.averageRating !== undefined && (
-                     <p>متوسط التقييم (بالنجوم): {analytics.averageRating.toFixed(2)} / 5</p>
-                  )}
-                   {analytics.averageRating === undefined && analytics.totalQuestions > 0 && (
-                     <p>متوسط التقييم (بالنجوم): لا توجد تقييمات كافية</p>
-                  )}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-sm">
+                
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg text-center lg:text-right">الملخص العام</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+                    <Card className="p-4 text-center bg-background/50">
+                        <ListChecks className="h-8 w-8 mx-auto text-primary mb-2" />
+                        <p className="text-2xl font-bold">{analytics.totalQuestions}</p>
+                        <p className="text-muted-foreground text-xs">إجمالي الأسئلة</p>
+                    </Card>
+                     <Card className="p-4 text-center bg-background/50">
+                        <Users2 className="h-8 w-8 mx-auto text-primary mb-2" />
+                        <p className="text-2xl font-bold">{analytics.uniqueUsers}</p>
+                        <p className="text-muted-foreground text-xs">إجمالي المستخدمين المتفاعلين</p>
+                    </Card>
+                     <Card className="p-4 text-center bg-background/50">
+                        <MessageSquare className="h-8 w-8 mx-auto text-primary mb-2" />
+                        <p className="text-2xl font-bold">{analytics.totalReviewsWithText}</p>
+                        <p className="text-muted-foreground text-xs">إجمالي المراجعات النصية</p>
+                    </Card>
+                     <Card className="p-4 text-center bg-background/50">
+                        <Star className="h-8 w-8 mx-auto text-primary mb-2" />
+                        <p className="text-2xl font-bold">{analytics.averageRating ? analytics.averageRating.toFixed(2) : 'N/A'}</p>
+                        <p className="text-muted-foreground text-xs">متوسط التقييم</p>
+                    </Card>
+                  </div>
                    {analytics.totalQuestions === 0 && (
-                    <p className="text-muted-foreground mt-2">
+                    <p className="text-muted-foreground mt-4 text-center">
                         لا توجد أسئلة مسجلة لعرض ملخص الإحصائيات.
                     </p>
                  )}
                 </div>
 
                 {analytics.questionsByAgeGroupChartData && analytics.questionsByAgeGroupChartData.length > 0 ? (
-                  <div className="h-[300px] md:h-[350px] mt-4 md:mt-0">
-                    <h3 className="font-semibold text-lg mb-2 text-center md:text-right">الأسئلة حسب الفئة العمرية:</h3>
+                  <div className="h-[300px] md:h-[350px] mt-4 lg:mt-0">
+                    <h3 className="font-semibold text-lg mb-2 text-center lg:text-right">الأسئلة حسب الفئة العمرية</h3>
                     <ResponsiveContainer width="100%" height="100%">
                        <ChartContainer config={chartConfig} className="w-full h-full">
                         <BarChart
@@ -277,7 +291,7 @@ export default function AdminPage() {
                   </div>
                 ) : (
                   analytics.totalQuestions > 0 && (
-                    <div className="flex items-center justify-center h-[300px] md:h-[350px] mt-4 md:mt-0 bg-muted/30 rounded-md">
+                    <div className="flex items-center justify-center h-[300px] md:h-[350px] mt-4 lg:mt-0 bg-muted/30 rounded-md">
                         <p className="text-muted-foreground text-center p-4">
                         لا توجد بيانات أسئلة موزعة حسب الفئة العمرية لعرض الرسم البياني.
                         </p>
@@ -367,8 +381,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    
-
-    
-
