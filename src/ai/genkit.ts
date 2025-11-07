@@ -23,5 +23,5 @@ export const ai = genkit({
   ],
   // The model specified here will only be used if the googleAI plugin is successfully initialized.
   // If no plugin provides this model, calls to it will fail.
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-pro',
 });
