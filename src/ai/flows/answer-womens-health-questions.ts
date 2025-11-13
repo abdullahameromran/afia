@@ -113,7 +113,13 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
     if (responseData.candidates && responseData.candidates[0] && responseData.candidates[0].content && responseData.candidates[0].content.parts[0]) {
         generatedAnswer = responseData.candidates[0].content.parts[0].text;
     } else {
-        console.warn("Unexpected API response structure:", responseData);
+        console.warn("Unexpected API response structure or no content:", responseData);
+        // If the API call succeeds but there's no answer for some reason (e.g. safety block), provide a clearer message.
+        if (responseData.candidates && responseData.candidates[0] && responseData.candidates[0].finishReason !== 'STOP') {
+             generatedAnswer = `تم حظر الإجابة بسبب سياسات السلامة. سبب الإنهاء: ${responseData.candidates[0].finishReason}`;
+        } else {
+             generatedAnswer = "لم يتمكن الذكاء الاصطناعي من تقديم إجابة. قد يكون السؤال خارج نطاق خبرته أو تم حظره.";
+        }
     }
 
   } catch (apiError) {
