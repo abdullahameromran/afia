@@ -5,32 +5,17 @@
  * - getReviews - A function that retrieves reviews from the database.
  * - Review - The type for a single review object.
  */
-
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
 import { createSupabaseServiceRoleClient } from '@/lib/supabaseClient';
 
-const ReviewSchema = z.object({
-  userName: z.string().nullable().describe('The name of the user who left the review.'),
-  rating: z.number().describe('The star rating from 1 to 5.'),
-  reviewText: z.string().describe('The text content of the review.'),
-});
-export type Review = z.infer<typeof ReviewSchema>;
-
-const GetReviewsOutputSchema = z.array(ReviewSchema);
-export type GetReviewsOutput = z.infer<typeof GetReviewsOutputSchema>;
-
-export async function getReviews(): Promise<GetReviewsOutput> {
-  return getReviewsFlow();
+export interface Review {
+  userName: string | null;
+  rating: number;
+  reviewText: string;
 }
 
-const getReviewsFlow = ai.defineFlow(
-  {
-    name: 'getReviewsFlow',
-    inputSchema: z.void(),
-    outputSchema: GetReviewsOutputSchema,
-  },
-  async () => {
+export type GetReviewsOutput = Review[];
+
+export async function getReviews(): Promise<GetReviewsOutput> {
     const supabase = createSupabaseServiceRoleClient();
     if (!supabase) {
       console.error('Supabase client (service role) not initialized. Cannot fetch reviews.');
@@ -64,5 +49,4 @@ const getReviewsFlow = ai.defineFlow(
       console.error('Exception fetching reviews:', e);
       return [];
     }
-  }
-);
+}

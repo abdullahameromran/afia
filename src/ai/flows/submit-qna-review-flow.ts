@@ -8,34 +8,21 @@
  * - SubmitQnaReviewOutput - The return type for the submitQnaReview function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
 import { createSupabaseServiceRoleClient } from '@/lib/supabaseClient';
 
-const SubmitQnaReviewInputSchema = z.object({
-  qnaId: z.number().describe('The ID of the Q&A history record to review.'),
-  rating: z.number().min(1).max(5).optional().describe('The rating from 1 to 5 stars (optional).'),
-  reviewText: z.string().optional().describe('The textual review comment (optional).'),
-});
-export type SubmitQnaReviewInput = z.infer<typeof SubmitQnaReviewInputSchema>;
-
-const SubmitQnaReviewOutputSchema = z.object({
-  success: z.boolean().describe('Whether the review submission was successful.'),
-  message: z.string().optional().describe('An optional message regarding the submission status.'),
-});
-export type SubmitQnaReviewOutput = z.infer<typeof SubmitQnaReviewOutputSchema>;
-
-export async function submitQnaReview(input: SubmitQnaReviewInput): Promise<SubmitQnaReviewOutput> {
-  return submitQnaReviewFlow(input);
+export interface SubmitQnaReviewInput {
+  qnaId: number;
+  rating?: number;
+  reviewText?: string;
 }
 
-const submitQnaReviewFlow = ai.defineFlow(
-  {
-    name: 'submitQnaReviewFlow',
-    inputSchema: SubmitQnaReviewInputSchema,
-    outputSchema: SubmitQnaReviewOutputSchema,
-  },
-  async (input) => {
+export interface SubmitQnaReviewOutput {
+  success: boolean;
+  message?: string;
+}
+
+
+export async function submitQnaReview(input: SubmitQnaReviewInput): Promise<SubmitQnaReviewOutput> {
     const supabase = createSupabaseServiceRoleClient();
     if (!supabase) {
       console.error('Supabase client (service role) not initialized. Cannot submit review.');
@@ -71,6 +58,4 @@ const submitQnaReviewFlow = ai.defineFlow(
       console.error('Exception submitting Q&A review:', e);
       return { success: false, message: `حدث خطأ غير متوقع: ${e.message}` };
     }
-  }
-);
-
+}

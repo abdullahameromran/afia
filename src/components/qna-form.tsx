@@ -28,13 +28,6 @@ const qnaFormSchema = z.object({
 
 type QnaFormValues = z.infer<typeof qnaFormSchema>;
 
-// Review form schema is not used with react-hook-form for this simple implementation
-// const reviewFormSchema = z.object({
-//     rating: z.number().min(1).max(5).optional(),
-//     reviewText: z.string().optional(),
-// });
-// type ReviewFormValues = z.infer<typeof reviewFormSchema>;
-
 
 export function QnaForm() {
   const [aiResponse, setAiResponse] = useState<string | null>(null);
@@ -172,6 +165,14 @@ export function QnaForm() {
 
   return (
     <Card className="w-full shadow-xl bg-card text-right" dir="rtl">
+      <CardHeader>
+        <CardTitle className="font-headline text-3xl sm:text-4xl text-center text-primary mb-2">
+            هل لديكِ سؤال؟
+        </CardTitle>
+        <CardDescription className="text-center text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+            بعد الاطلاع على المعلومات في الأقسام السابقة، إذا كان لا يزال لديكِ استفسار محدد حول صحتكِ، يمكنكِ طرحه هنا للحصول على إجابة من الذكاء الاصطناعي.
+        </CardDescription>
+      </CardHeader>
       <CardContent className="p-6">
         <Form {...qnaForm}>
           <form onSubmit={qnaForm.handleSubmit(onQnaSubmit)} className="space-y-6">
@@ -335,4 +336,3 @@ export function QnaForm() {
     </Card>
   );
 }
-
