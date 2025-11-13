@@ -63,17 +63,13 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
   }
 
   const apiKey = "AIzaSyCjVO52f_FujMdOn9Z_L8v72wuk6BNtz64";
-  if (!apiKey) {
-      console.error("The hardcoded API key is not set.");
-      return { answer: "حدث خطأ: تكوين خدمة الذكاء الاصطناعي غير صحيح." };
-  }
-
+  
   const promptText = buildPrompt(input);
   
   let generatedAnswer = "لم أتمكن من إنشاء إجابة. يرجى المحاولة مرة أخرى أو إعادة صياغة سؤالك.";
 
   try {
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
