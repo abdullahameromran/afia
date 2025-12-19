@@ -110,21 +110,29 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
     const responseData = await response.json();
     
-    if (responseData.candidates && responseData.candidates[0] && responseData.candidates[0].content && responseData.candidates[0].content.parts[0]) {
+    // Check for a valid text response in the candidates array
+    if (responseData.candidates && responseData.candidates[0] && responseData.candidates[0].content && responseData.candidates[0].content.parts[0] && responseData.candidates[0].content.parts[0].text) {
         generatedAnswer = responseData.candidates[0].content.parts[0].text;
     } else {
-        console.warn("Unexpected API response structure or no content:", responseData);
-        // If the API call succeeds but there's no answer for some reason (e.g. safety block), provide a clearer message.
-        if (responseData.candidates && responseData.candidates[0] && responseData.candidates[0].finishReason !== 'STOP') {
-             generatedAnswer = `تم حظر الإجابة بسبب سياسات السلامة. سبب الإنهاء: ${responseData.candidates[0].finishReason}`;
+        // If there is no valid text, it might be due to safety settings or other reasons.
+        console.warn("API response did not contain valid text content:", responseData);
+
+        let finishReason = 'غير معروف';
+        if (responseData.candidates && responseData.candidates[0] && responseData.candidates[0].finishReason) {
+            finishReason = responseData.candidates[0].finishReason;
+        }
+
+        // Provide a more specific message to the user
+        if (finishReason === 'SAFETY') {
+            generatedAnswer = "لم يتمكن الذكاء الاصطناعي من الإجابة على هذا السؤال لأنه قد يخالف سياسات السلامة. يرجى إعادة صياغة سؤالك.";
         } else {
-             generatedAnswer = "لم يتمكن الذكاء الاصطناعي من تقديم إجابة. قد يكون السؤال خارج نطاق خبرته أو تم حظره.";
+            generatedAnswer = `لم يتمكن الذكاء الاصطناعي من تقديم إجابة. سبب الإنهاء: ${finishReason}.`;
         }
     }
 
   } catch (apiError) {
       console.error("Error calling Gemini API:", apiError);
-      // Return a user-friendly error, the actual error is logged for debugging
+      // This is the generic error message you have been seeing.
       return { answer: "حدث خطأ أثناء التواصل مع خدمة الذكاء الاصطناعي. الرجاء المحاولة مرة أخرى." };
   }
 
