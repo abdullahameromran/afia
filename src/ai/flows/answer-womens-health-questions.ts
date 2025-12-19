@@ -73,7 +73,7 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': "AIzaSyCjVO52f_FujMdOn9Z_L8v72wuk6BNtz64",
+            'x-goog-api-key': apiKey,
         },
         body: JSON.stringify({
             contents: [{
