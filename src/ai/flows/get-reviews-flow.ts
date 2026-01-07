@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Fetches a list of recent, positive reviews.
@@ -25,7 +26,7 @@ export async function getReviews(): Promise<GetReviewsOutput> {
     try {
       const { data, error } = await supabase
         .from('qnaHistory')
-        .select('userName, rating, review_text')
+        .select('userName, rating, reviewText: review_text')
         .not('review_text', 'is', null)
         .neq('review_text', '')
         .gte('rating', 4)
@@ -40,7 +41,7 @@ export async function getReviews(): Promise<GetReviewsOutput> {
       const reviews = data.map(item => ({
         userName: item.userName,
         rating: item.rating!,
-        reviewText: item.review_text!,
+        reviewText: item.reviewText!,
       }));
 
       return reviews;
