@@ -110,11 +110,9 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
     const responseData = await response.json();
     
-    // Check for a valid text response in the candidates array
     if (responseData.candidates && responseData.candidates[0] && responseData.candidates[0].content && responseData.candidates[0].content.parts[0] && responseData.candidates[0].content.parts[0].text) {
         generatedAnswer = responseData.candidates[0].content.parts[0].text;
     } else {
-        // If there is no valid text, it might be due to safety settings or other reasons.
         console.warn("API response did not contain valid text content:", responseData);
 
         let finishReason = 'غير معروف';
@@ -122,7 +120,6 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
             finishReason = responseData.candidates[0].finishReason;
         }
 
-        // Provide a more specific message to the user
         if (finishReason === 'SAFETY') {
             generatedAnswer = "لم يتمكن الذكاء الاصطناعي من الإجابة على هذا السؤال لأنه قد يخالف سياسات السلامة. يرجى إعادة صياغة سؤالك.";
         } else {
@@ -132,14 +129,11 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
   } catch (apiError) {
       console.error("Error calling Gemini API:", apiError);
-      // This is the generic error message you have been seeing.
       return { answer: "حدث خطأ أثناء التواصل مع خدمة الذكاء الاصطناعي. الرجاء المحاولة مرة أخرى." };
   }
 
-
   const supabase = createSupabaseServiceRoleClient();
-  let qnaIdForOutput: number | undefined = undefined;
-
+  
   if (generatedAnswer && supabase) {
     try {
       const { data: insertedData, error: insertError } = await supabase
@@ -150,7 +144,6 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
             userName: input.userName || null, 
             age_label: input.textualAgeLabel || null, 
             answer: generatedAnswer,
-            // timestamp is handled by DB default NOW()
           }
         ])
         .select('id') 
@@ -158,18 +151,23 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
       if (insertError) {
         console.error("Error saving Q&A history to Supabase:", insertError);
-      } else if (insertedData) {
-        console.log("Q&A history saved to Supabase with ID:", insertedData.id);
-        qnaIdForOutput = insertedData.id;
+        // Still return the answer, but without a qnaId
+        return { answer: generatedAnswer, qnaId: undefined };
       }
+      
+      if (insertedData) {
+        console.log("Q&A history saved to Supabase with ID:", insertedData.id);
+        // This is the successful path, return answer and the new ID
+        return { answer: generatedAnswer, qnaId: insertedData.id };
+      }
+
     } catch (e) {
       console.error("Exception saving Q&A history to Supabase:", e);
+      // Return the answer even if DB save fails, but without qnaId
+      return { answer: generatedAnswer, qnaId: undefined };
     }
-  } else if (!supabase) {
-    console.warn("Supabase client (service role) is not initialized. Skipping save of Q&A history. Please check Supabase configuration in .env.");
-  } else if (!generatedAnswer) {
-    console.warn("AI did not return an answer. Skipping save of Q&A history.");
   }
-  
-  return { answer: generatedAnswer, qnaId: qnaIdForOutput };
+
+  // Fallback return in case Supabase client is not initialized or no answer was generated
+  return { answer: generatedAnswer, qnaId: undefined };
 }
