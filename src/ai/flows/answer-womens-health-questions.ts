@@ -137,6 +137,7 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
       if (insertError) {
         console.error("Error saving Q&A history to Supabase:", insertError);
+        // Still return the answer even if saving fails.
         return { answer: generatedAnswer, qnaId: undefined };
       }
       
@@ -147,9 +148,11 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
     } catch (e) {
       console.error("Exception saving Q&A history to Supabase:", e);
+      // Still return the answer even if saving fails.
       return { answer: generatedAnswer, qnaId: undefined };
     }
   }
 
+  // Fallback return if Supabase isn't configured or something else goes wrong.
   return { answer: generatedAnswer, qnaId: undefined };
 }
