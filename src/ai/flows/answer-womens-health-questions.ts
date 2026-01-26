@@ -2,28 +2,30 @@
 'use server';
 
 /**
- * @fileOverview This file defines a function for answering women's health questions using a direct HTTPS call to the Gemini API.
+ * @fileOverview This file defines a function for answering women's health questions using a direct HTTPS call.
  *
  * - answerWomensHealthQuestion - A function that accepts a question and returns an answer and Q&A record ID.
  * - AnswerWomensHealthQuestionInput - The input type for the answerWomensHealthQuestion function.
  * - AnswerWomensHealthQuestionOutput - The return type for the answerWomensHealthQuestion function.
  */
+import { createSupabaseServiceRoleClient } from '@/lib/supabaseClient';
+import { z } from 'zod';
 
-import { createSupabaseServiceRoleClient } from '@/lib/supabaseClient'; 
+const AnswerWomensHealthQuestionInputSchema = z.object({
+  question: z.string(),
+  userName: z.string().optional(),
+  numericAgeForAI: z.number().optional(),
+  textualAgeLabel: z.string().optional(),
+});
 
-export interface AnswerWomensHealthQuestionInput {
-  question: string;
-  userName?: string;
-  numericAgeForAI?: number;
-  textualAgeLabel?: string;
-}
+const AnswerWomensHealthQuestionOutputSchema = z.object({
+  answer: z.string(),
+  qnaId: z.number().optional(),
+});
 
-export interface AnswerWomensHealthQuestionOutput {
-  answer: string;
-  qnaId?: number;
-}
+export type AnswerWomensHealthQuestionInput = z.infer<typeof AnswerWomensHealthQuestionInputSchema>;
+export type AnswerWomensHealthQuestionOutput = z.infer<typeof AnswerWomensHealthQuestionOutputSchema>;
 
-// This is the prompt that will be sent to the Gemini API.
 const buildPrompt = (input: AnswerWomensHealthQuestionInput): string => {
     let prompt = `You are a supportive and informative AI assistant specializing in women's health, including topics related to pregnancy, childbirth, family planning, and general female healthcare. Your goal is to provide scientifically-grounded general information and context, like a knowledgeable guide. ALL RESPONSES MUST BE IN ARABIC.
 
@@ -51,84 +53,68 @@ User's Question: ${input.question}`;
     if (input.textualAgeLabel) {
         prompt += `\nUser's life stage category: ${input.textualAgeLabel}`;
     }
-
     return prompt;
 };
 
 
 export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuestionInput): Promise<AnswerWomensHealthQuestionOutput> {
   if (!input.question) {
-    console.error("answerWomensHealthQuestion called with no question.");
     return { answer: "حدث خطأ: لم يتم تقديم أي سؤال." };
   }
 
-  const apiKey = "AIzaSyCjVO52f_FujMdOn9Z_L8v72wuk6BNtz64";
-  
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) {
+    console.error("GOOGLE_API_KEY is not set.");
+    return { answer: "حدث خطأ: مفتاح الواجهة البرمجية غير مهيأ." };
+  }
+
   const promptText = buildPrompt(input);
-  
-  let generatedAnswer = "لم أتمكن من إنشاء إجابة. يرجى المحاولة مرة أخرى أو إعادة صياغة سؤالك.";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+  let generatedAnswer: string;
 
   try {
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-        },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{
-                    text: promptText
-                }]
-            }],
-            safetySettings: [
-                {
-                    category: 'HARM_CATEGORY_HATE_SPEECH',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-                },
-                {
-                    category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-                },
-                {
-                    category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-                },
-                {
-                    category: 'HARM_CATEGORY_HARASSMENT',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-                },
-            ],
-        })
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: promptText
+          }]
+        }],
+        safetySettings: [
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        ]
+      })
     });
 
     if (!response.ok) {
-        const errorBody = await response.text();
-        console.error("Gemini API request failed:", response.status, errorBody);
-        throw new Error(`API request failed with status ${response.status}`);
+        const errorBody = await response.json().catch(() => ({ message: response.statusText }));
+        console.error("API Error Response:", errorBody);
+        throw new Error(`فشلت استجابة الواجهة البرمجية: ${errorBody.error?.message || response.statusText}`);
     }
 
     const responseData = await response.json();
-    
-    if (responseData.candidates && responseData.candidates[0] && responseData.candidates[0].content && responseData.candidates[0].content.parts[0] && responseData.candidates[0].content.parts[0].text) {
-        generatedAnswer = responseData.candidates[0].content.parts[0].text;
+
+    if (responseData.candidates && responseData.candidates.length > 0 && responseData.candidates[0].content) {
+      generatedAnswer = responseData.candidates[0].content.parts[0].text;
     } else {
-        console.warn("API response did not contain valid text content:", responseData);
-
-        let finishReason = 'غير معروف';
-        if (responseData.candidates && responseData.candidates[0] && responseData.candidates[0].finishReason) {
-            finishReason = responseData.candidates[0].finishReason;
-        }
-
-        if (finishReason === 'SAFETY') {
-            generatedAnswer = "لم يتمكن الذكاء الاصطناعي من الإجابة على هذا السؤال لأنه قد يخالف سياسات السلامة. يرجى إعادة صياغة سؤالك.";
-        } else {
-            generatedAnswer = `لم يتمكن الذكاء الاصطناعي من تقديم إجابة. سبب الإنهاء: ${finishReason}.`;
-        }
+      console.warn("API response blocked or empty:", responseData);
+      let blockReason = responseData.promptFeedback?.blockReason;
+      if(blockReason) {
+         return { answer: `لم يتمكن الذكاء الاصطناعي من الإجابة على هذا السؤال لأنه قد يخالف سياسات السلامة. السبب: ${blockReason}` };
+      }
+      return { answer: "لم يتمكن الذكاء الاصطناعي من الإجابة على هذا السؤال لأنه قد يخالف سياسات السلامة. يرجى إعادة صياغة سؤالك." };
     }
 
-  } catch (apiError) {
-      console.error("Error calling Gemini API:", apiError);
+  } catch (apiError: any) {
+      console.error("Error calling Google AI API:", apiError);
       return { answer: "حدث خطأ أثناء التواصل مع خدمة الذكاء الاصطناعي. الرجاء المحاولة مرة أخرى." };
   }
 
@@ -151,23 +137,19 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
       if (insertError) {
         console.error("Error saving Q&A history to Supabase:", insertError);
-        // Still return the answer, but without a qnaId
         return { answer: generatedAnswer, qnaId: undefined };
       }
       
       if (insertedData) {
         console.log("Q&A history saved to Supabase with ID:", insertedData.id);
-        // This is the successful path, return answer and the new ID
         return { answer: generatedAnswer, qnaId: insertedData.id };
       }
 
     } catch (e) {
       console.error("Exception saving Q&A history to Supabase:", e);
-      // Return the answer even if DB save fails, but without qnaId
       return { answer: generatedAnswer, qnaId: undefined };
     }
   }
 
-  // Fallback return in case Supabase client is not initialized or no answer was generated
   return { answer: generatedAnswer, qnaId: undefined };
 }
