@@ -46,20 +46,24 @@ export async function summarizeWomensHealthArticle(
             })
         });
 
-        if (!response.ok) {
-            const errorBody = await response.json().catch(() => ({ message: response.statusText }));
-            console.error("Summarize API Error Response:", errorBody);
-            throw new Error(`API response failed: ${errorBody.error?.message || response.statusText}`);
-        }
-
         const responseData = await response.json();
+
+        if (!response.ok) {
+            const errorMessage = responseData.error?.message || response.statusText;
+            console.error("Summarize API Error Response:", JSON.stringify(responseData, null, 2));
+            throw new Error(`API response failed (${response.status}): ${errorMessage}`);
+        }
         
-        if (responseData.candidates && responseData.candidates.length > 0 && responseData.candidates[0].content) {
+        if (responseData.candidates && responseData.candidates.length > 0 && responseData.candidates[0].content?.parts[0]?.text) {
             const summary = responseData.candidates[0].content.parts[0].text;
             return { summary };
         } else {
             console.warn("Summarize API response blocked or empty:", responseData);
-            throw new Error("Failed to generate a summary from the article.");
+            let blockReason = responseData.promptFeedback?.blockReason;
+            if (blockReason) {
+              throw new Error(`Failed to generate summary, it may violate safety policies. Reason: ${blockReason}`);
+            }
+            throw new Error("Failed to generate a summary from the article. The response was empty or blocked.");
         }
 
     } catch (e: any) {

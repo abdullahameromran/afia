@@ -59,19 +59,20 @@ User's Question: ${input.question}`;
 
 export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuestionInput): Promise<AnswerWomensHealthQuestionOutput> {
   if (!input.question) {
-    return { answer: "حدث خطأ: لم يتم تقديم أي سؤال." };
+    throw new Error("حدث خطأ: لم يتم تقديم أي سؤال.");
   }
 
   const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     console.error("GOOGLE_API_KEY is not set.");
-    return { answer: "حدث خطأ: مفتاح الواجهة البرمجية غير مهيأ." };
+    throw new Error("حدث خطأ: مفتاح الواجهة البرمجية غير مهيأ.");
   }
 
   const promptText = buildPrompt(input);
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   let generatedAnswer: string;
+  let responseData: any;
 
   try {
     const response = await fetch(url, {
@@ -93,29 +94,33 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
         ]
       })
     });
+    
+    // Always try to parse the JSON body, as even errors will be in JSON format.
+    responseData = await response.json();
 
     if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({ message: response.statusText }));
-        console.error("API Error Response:", errorBody);
-        throw new Error(`فشلت استجابة الواجهة البرمجية: ${errorBody.error?.message || response.statusText}`);
+        const errorMessage = responseData.error?.message || response.statusText;
+        console.error("API Error Response:", JSON.stringify(responseData, null, 2));
+        // Throw a detailed error that the frontend will display.
+        throw new Error(`فشلت استجابة الواجهة البرمجية (${response.status}): ${errorMessage}`);
     }
 
-    const responseData = await response.json();
-
-    if (responseData.candidates && responseData.candidates.length > 0 && responseData.candidates[0].content) {
+    if (responseData.candidates && responseData.candidates.length > 0 && responseData.candidates[0].content?.parts[0]?.text) {
       generatedAnswer = responseData.candidates[0].content.parts[0].text;
     } else {
       console.warn("API response blocked or empty:", responseData);
       let blockReason = responseData.promptFeedback?.blockReason;
-      if(blockReason) {
-         return { answer: `لم يتمكن الذكاء الاصطناعي من الإجابة على هذا السؤال لأنه قد يخالف سياسات السلامة. السبب: ${blockReason}` };
+      if (blockReason) {
+         generatedAnswer = `لم يتمكن الذكاء الاصطناعي من الإجابة على هذا السؤال لأنه قد يخالف سياسات السلامة. السبب: ${blockReason}`;
+      } else {
+         generatedAnswer = "لم يتمكن الذكاء الاصطناعي من الإجابة على هذا السؤال. قد يكون السبب يتعلق بسياسات السلامة. يرجى إعادة صياغة سؤالك.";
       }
-      return { answer: "لم يتمكن الذكاء الاصطناعي من الإجابة على هذا السؤال لأنه قد يخالف سياسات السلامة. يرجى إعادة صياغة سؤالك." };
     }
 
   } catch (apiError: any) {
       console.error("Error calling Google AI API:", apiError);
-      return { answer: "حدث خطأ أثناء التواصل مع خدمة الذكاء الاصطناعي. الرجاء المحاولة مرة أخرى." };
+      // Re-throw the error so the client-side can catch it and display the detailed message.
+      throw new Error(`حدث خطأ أثناء التواصل مع خدمة الذكاء الاصطناعي. التفاصيل: ${apiError.message}`);
   }
 
   const supabase = createSupabaseServiceRoleClient();
@@ -137,7 +142,6 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
       if (insertError) {
         console.error("Error saving Q&A history to Supabase:", insertError);
-        // Still return the answer even if saving fails.
         return { answer: generatedAnswer, qnaId: undefined };
       }
       
@@ -148,11 +152,9 @@ export async function answerWomensHealthQuestion(input: AnswerWomensHealthQuesti
 
     } catch (e) {
       console.error("Exception saving Q&A history to Supabase:", e);
-      // Still return the answer even if saving fails.
       return { answer: generatedAnswer, qnaId: undefined };
     }
   }
 
-  // Fallback return if Supabase isn't configured or something else goes wrong.
   return { answer: generatedAnswer, qnaId: undefined };
 }
