@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2 as BarChartIconLucide, Star, MessageSquare, Users2 } from 'lucide-react'; // Renamed BarChart2 to avoid conflict
 import Image from 'next/image';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseClient } from '@/lib/supabaseClient';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -62,6 +62,7 @@ export default function AdminPage() {
         setHistoryError(null);
         setAnalytics(null);
 
+        const supabase = getSupabaseClient();
         if (!supabase) {
             console.warn("Supabase client is not initialized. Cannot fetch Q&A history. Please check Supabase configuration in .env.");
             setHistoryError("فشل الاتصال بخدمة تخزين البيانات. يرجى التحقق من إعدادات الاتصال وملف .env.");
@@ -334,7 +335,7 @@ export default function AdminPage() {
             {!historyLoading && !historyError && qnaHistory.length === 0 && (
               <div className="p-6 border border-dashed border-border rounded-lg text-center">
                 <p className="text-muted-foreground">
-                  {supabase ? "لا يوجد سجل أسئلة وأجوبة لعرضه حتى الآن." : "خدمة تخزين البيانات غير مهيأة. يرجى التحقق من الإعدادات في ملف .env."}
+                  {getSupabaseClient() ? "لا يوجد سجل أسئلة وأجوبة لعرضه حتى الآن." : "خدمة تخزين البيانات غير مهيأة. يرجى التحقق من الإعدادات في ملف .env."}
                 </p>
               </div>
             )}
