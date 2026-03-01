@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -6,11 +5,10 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2 as BarChartIconLucide, Star, MessageSquare, Users2 } from 'lucide-react'; // Renamed BarChart2 to avoid conflict
+import { Loader2, LogOut, ListChecks, AlertTriangle, Heart, BarChart2 as BarChartIconLucide, Star, MessageSquare, Users2 } from 'lucide-react';
 import Image from 'next/image';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 
@@ -114,7 +112,7 @@ export default function AdminPage() {
 
           } else {
              setQnaHistory([]);
-             setAnalytics({ // Set empty analytics if no data
+             setAnalytics({
                 totalQuestions: 0,
                 questionsByAgeGroup: {},
                 uniqueUsers: 0,
@@ -179,7 +177,7 @@ export default function AdminPage() {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-gradient-to-br from-[#FCE4EC] to-[#F8BBD0] p-4 sm:p-8 text-right" dir="rtl">
-      <header className="w-full max-w-6xl mb-8 flex justify-between items-center">
+      <header className="w-full max-w-6xl mb-8 flex justify-between items-center print:hidden">
         <div className="flex items-center gap-2 sm:gap-4">
            <Image
               src="https://be13a6bfb72b1843b287a4c59c4f4174.cdn.bubble.io/f1749070664202x663207571008088400/8624f5b1-c5a3-438a-bbfa-4c1deda79052.jpg"
@@ -204,11 +202,18 @@ export default function AdminPage() {
         </div>
       </header>
 
+      {/* Print header */}
+      <div className="hidden print:block w-full text-center mb-8">
+        <h1 className="text-3xl font-bold text-primary">تقرير سجل الأسئلة والأجوبة - صحتكِ تهمنا</h1>
+        <p className="text-lg">بإشراف أ.د/ عايدة عبدالرازق</p>
+        <p className="text-sm mt-2">تاريخ التقرير: {new Date().toLocaleDateString('ar-EG')}</p>
+      </div>
+
       <main className="w-full max-w-6xl space-y-8">
-        <Card className="shadow-lg">
-          <CardHeader className="text-right">
+        <Card className="shadow-lg print:shadow-none print:border-none">
+          <CardHeader className="text-right print:pb-2">
             <CardTitle className="text-2xl text-primary flex items-center justify-end gap-2">
-              <BarChartIconLucide />
+              <BarChartIconLucide className="print:hidden" />
               إحصائيات الاستخدام
             </CardTitle>
             <CardDescription className="text-right">
@@ -232,7 +237,7 @@ export default function AdminPage() {
                 
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg text-center lg:text-right">الملخص العام</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <Card className="p-4 text-center bg-background/50">
                         <ListChecks className="h-8 w-8 mx-auto text-primary mb-2" />
                         <p className="text-2xl font-bold">{analytics.totalQuestions}</p>
@@ -241,12 +246,12 @@ export default function AdminPage() {
                      <Card className="p-4 text-center bg-background/50">
                         <Users2 className="h-8 w-8 mx-auto text-primary mb-2" />
                         <p className="text-2xl font-bold">{analytics.uniqueUsers}</p>
-                        <p className="text-muted-foreground text-xs">إجمالي المستخدمين المتفاعلين</p>
+                        <p className="text-muted-foreground text-xs">إجمالي المستخدمين</p>
                     </Card>
                      <Card className="p-4 text-center bg-background/50">
                         <MessageSquare className="h-8 w-8 mx-auto text-primary mb-2" />
                         <p className="text-2xl font-bold">{analytics.totalReviewsWithText}</p>
-                        <p className="text-muted-foreground text-xs">إجمالي المراجعات النصية</p>
+                        <p className="text-muted-foreground text-xs">إجمالي المراجعات</p>
                     </Card>
                      <Card className="p-4 text-center bg-background/50">
                         <Star className="h-8 w-8 mx-auto text-primary mb-2" />
@@ -254,15 +259,10 @@ export default function AdminPage() {
                         <p className="text-muted-foreground text-xs">متوسط التقييم</p>
                     </Card>
                   </div>
-                   {analytics.totalQuestions === 0 && (
-                    <p className="text-muted-foreground mt-4 text-center">
-                        لا توجد أسئلة مسجلة لعرض ملخص الإحصائيات.
-                    </p>
-                 )}
                 </div>
 
-                {analytics.questionsByAgeGroupChartData && analytics.questionsByAgeGroupChartData.length > 0 ? (
-                  <div className="h-[300px] md:h-[350px] mt-4 lg:mt-0">
+                {analytics.questionsByAgeGroupChartData && analytics.questionsByAgeGroupChartData.length > 0 && (
+                  <div className="h-[300px] md:h-[350px] mt-4 lg:mt-0 print:hidden">
                     <h3 className="font-semibold text-lg mb-2 text-center lg:text-right">الأسئلة حسب الفئة العمرية</h3>
                     <ResponsiveContainer width="100%" height="100%">
                        <ChartContainer config={chartConfig} className="w-full h-full">
@@ -290,36 +290,23 @@ export default function AdminPage() {
                       </ChartContainer>
                     </ResponsiveContainer>
                   </div>
-                ) : (
-                  analytics.totalQuestions > 0 && (
-                    <div className="flex items-center justify-center h-[300px] md:h-[350px] mt-4 lg:mt-0 bg-muted/30 rounded-md">
-                        <p className="text-muted-foreground text-center p-4">
-                        لا توجد بيانات أسئلة موزعة حسب الفئة العمرية لعرض الرسم البياني.
-                        </p>
-                    </div>
-                  )
                 )}
               </div>
-            )}
-             {!historyLoading && !historyError && (!analytics || analytics.totalQuestions === 0) && (
-                <p className="text-muted-foreground text-center py-6">
-                    لا توجد بيانات كافية لعرض الإحصائيات.
-                </p>
             )}
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg">
+        <Card className="shadow-lg print:shadow-none print:border-none">
           <CardHeader className="text-right">
             <CardTitle className="text-2xl text-primary flex items-center justify-end gap-2">
-              <ListChecks />
-              عرض سجل الأسئلة والأجوبة والتقييمات
+              <ListChecks className="print:hidden" />
+              سجل الأسئلة والأجوبة والتقييمات
             </CardTitle>
             <CardDescription className="text-right">
-              جميع الأسئلة، الإجابات، والتقييمات المدخلة من المستخدمين.
+              جميع التفاعلات المدخلة من المستخدمين (يظهر الجدول كاملاً عند الطباعة).
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 sm:p-6">
             {historyLoading && (
                 <div className="flex justify-center items-center py-10">
                     <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -334,47 +321,45 @@ export default function AdminPage() {
             )}
             {!historyLoading && !historyError && qnaHistory.length === 0 && (
               <div className="p-6 border border-dashed border-border rounded-lg text-center">
-                <p className="text-muted-foreground">
-                  {getSupabaseClient() ? "لا يوجد سجل أسئلة وأجوبة لعرضه حتى الآن." : "خدمة تخزين البيانات غير مهيأة. يرجى التحقق من الإعدادات في ملف .env."}
-                </p>
+                <p className="text-muted-foreground">لا يوجد سجل حالياً.</p>
               </div>
             )}
             {!historyLoading && !historyError && qnaHistory.length > 0 && (
-              <ScrollArea className="h-[500px] w-full border rounded-md">
+              <div className="w-full border rounded-md overflow-x-auto print:border-none">
                 <Table>
-                  <TableHeader className="sticky top-0 bg-card z-10">
+                  <TableHeader className="bg-card print:bg-white">
                     <TableRow>
                       <TableHead className="w-[130px] text-right">الوقت</TableHead>
                       <TableHead className="w-[100px] text-right">المستخدم</TableHead>
-                      <TableHead className="w-[150px] text-right">المرحلة العمرية</TableHead>
+                      <TableHead className="w-[120px] text-right">المرحلة</TableHead>
                       <TableHead className="text-right min-w-[200px]">السؤال</TableHead>
                       <TableHead className="text-right min-w-[250px]">الإجابة</TableHead>
-                      <TableHead className="w-[80px] text-right">التقييم</TableHead>
+                      <TableHead className="w-[100px] text-right">التقييم</TableHead>
                       <TableHead className="text-right min-w-[150px]">المراجعة</TableHead>
-                      <TableHead className="w-[50px] text-right">م</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {qnaHistory.map((entry, index) => (
-                      <TableRow key={entry.id}>
-                        <TableCell className="text-right text-xs">{entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</TableCell>
-                        <TableCell className="text-right text-xs">{entry.userName || '-'}</TableCell>
-                        <TableCell className="text-right text-xs">{entry.age_label || '-'}</TableCell>
-                        <TableCell className="whitespace-pre-wrap max-w-xs break-words text-right text-xs">{entry.question}</TableCell>
-                        <TableCell className="whitespace-pre-wrap max-w-sm break-words text-right text-xs">{entry.answer}</TableCell>
-                        <TableCell className="text-right text-xs">{renderStars(entry.rating)}</TableCell>
-                        <TableCell className="whitespace-pre-wrap max-w-xs break-words text-right text-xs">{entry.review_text || '-'}</TableCell>
-                        <TableCell className="text-right text-xs">{qnaHistory.length - index}</TableCell>
+                    {qnaHistory.map((entry) => (
+                      <TableRow key={entry.id} className="print:break-inside-avoid">
+                        <TableCell className="text-right text-xs align-top">
+                          {entry.timestamp ? new Date(entry.timestamp).toLocaleString('ar-EG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </TableCell>
+                        <TableCell className="text-right text-xs align-top font-medium">{entry.userName || '-'}</TableCell>
+                        <TableCell className="text-right text-xs align-top">{entry.age_label || '-'}</TableCell>
+                        <TableCell className="text-right text-xs align-top whitespace-pre-wrap max-w-xs">{entry.question}</TableCell>
+                        <TableCell className="text-right text-xs align-top whitespace-pre-wrap max-w-sm">{entry.answer}</TableCell>
+                        <TableCell className="text-right text-xs align-top">{renderStars(entry.rating)}</TableCell>
+                        <TableCell className="text-right text-xs align-top whitespace-pre-wrap max-w-xs italic text-muted-foreground">{entry.review_text || '-'}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              </ScrollArea>
+              </div>
             )}
           </CardContent>
         </Card>
       </main>
-       <footer className="mt-12 pt-8 border-t border-border/50 text-center w-full max-w-6xl">
+       <footer className="mt-12 pt-8 border-t border-border/50 text-center w-full max-w-6xl mb-8">
           <p className="text-sm text-muted-foreground/80">
             &copy; {new Date().getFullYear()} لوحة تحكم صحتكِ تهمنا
           </p>
